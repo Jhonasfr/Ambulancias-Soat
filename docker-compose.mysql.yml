@@ -1,0 +1,29 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: ambulancias
+      MYSQL_USER: ambulancias
+      MYSQL_PASSWORD: ambulancias*
+      MYSQL_ROOT_PASSWORD: ambulancias*
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/scripts/mysql.sql:/docker-entrypoint-initdb.d/mysql.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shared_net
+
+volumes:
+  mysql_data:
+
+networks:
+  shared_net:
+    external: false
