@@ -39,7 +39,9 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       console.warn("Token expirado o inválido, cerrando sesión...");
       localStorage.removeItem("user");
-      // No recargar la página automáticamente, dejar que el frontend maneje el error
+      if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+        window.location.replace("/login");
+      }
     }
 
     return Promise.reject(error);

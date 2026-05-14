@@ -856,17 +856,17 @@ class RegistrarMasivoTests(APITestCase):
     def test_post_csv_valido_crea_usuarios(self):
         f = self._csv_file(self._csv_valido("80001001"))
         resp = self.client.post(self.url, {"archivo": f}, format="multipart")
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Colaboradores.objects.filter(cccolaborador="80001001").exists())
 
     def test_post_csv_cedula_duplicada_reporta_error(self):
         _crear_colaborador("80002001")
         f = self._csv_file(self._csv_valido("80002001"))
         resp = self.client.post(self.url, {"archivo": f}, format="multipart")
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        # El registro duplicado debe aparecer en errores/omitidos
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        # El registro duplicado debe aparecer en detalles_errores
         data = resp.json()
-        self.assertIn("errores", data)
+        self.assertIn("detalles_errores", data)
 
 
 # ──────────────────────────────────────────────

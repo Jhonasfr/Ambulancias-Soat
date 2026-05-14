@@ -1,46 +1,17 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_DATABASE: ambulancias
-      MYSQL_USER: ambulancias
-      MYSQL_PASSWORD: ambulancias*
-      MYSQL_ROOT_PASSWORD: ambulancias*
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./backend/scripts/mysql.sql:/docker-entrypoint-initdb.d/mysql.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - shared_net
-
   backend:
     build: ./backend
     container_name: backend
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./backend:/app
+      - ./BACKEND:/app
     env_file:
       - .env
     environment:
-      - DB_ENGINE=django.db.backends.mysql
-      - DB_NAME=ambulancias
-      - DB_USER=ambulancias
-      - DB_PASSWORD=ambulancias*
-      - DB_HOST=mysql
-      - DB_PORT=3306
+      - DB_ENGINE=django.db.backends.sqlite3
+      - DB_NAME=/app/db.sqlite3
     ports:
       - "8000:8000"
-    depends_on:
-      mysql:
-        condition: service_healthy
     networks:
       - shared_net
 
@@ -49,7 +20,7 @@ services:
     container_name: frontend
     working_dir: /app
     volumes:
-      - ./frontend:/app
+      - ./FRONTEND:/app
       - /app/node_modules
     ports:
       - "3000:3000"
@@ -68,10 +39,6 @@ services:
       - backend
     networks:
       - shared_net
-
-volumes:
-  mysql_data:
-  redis_data:
 
 networks:
   shared_net:
