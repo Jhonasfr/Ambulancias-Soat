@@ -7,7 +7,7 @@ from django.http import JsonResponse, FileResponse
 from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from usuarios.permissions import IsSuperAdmin, IsAdminUser, IsUsuarioEspecial, IsSuperUserOrAdmin
 from usuarios.models import Colaboradores, Usuarios, Cargo, Niveles, Regional
@@ -89,7 +89,12 @@ class Perfil(APIView):
 
 
 class Register(APIView):
-    permission_classes = [IsAuthenticated, IsSuperAdmin, IsAdminUser]
+    permission_classes = []
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return []  # Registro público: no requiere token
+        return [IsAuthenticated(), IsSuperAdmin()]  # GET requiere autenticación
 
     def post(self, request, *args, **kwargs):
         payload = request.data if hasattr(request, 'data') else None
@@ -553,7 +558,12 @@ class ActualizarRolUsuarioView(APIView):
 
 class DatosCargoView(APIView):
     """CRUD para gestionar Cargos."""
-    permission_classes = [IsAuthenticated, IsSuperUserOrAdmin | IsUsuarioEspecial]
+    permission_classes = []
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return []  # GET público para el formulario de registro
+        return [IsAuthenticated(), IsSuperUserOrAdmin() | IsUsuarioEspecial()]
 
     def check_permission(self, request):
         tipo_usuario = getattr(request.user, 'tipousuario', None)
@@ -626,7 +636,12 @@ class DatosCargoView(APIView):
 
 class DatosNivelView(APIView):
     """CRUD para gestionar Niveles."""
-    permission_classes = [IsAuthenticated, IsSuperUserOrAdmin | IsUsuarioEspecial]
+    permission_classes = []
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return []  # GET público para el formulario de registro
+        return [IsAuthenticated(), IsSuperUserOrAdmin() | IsUsuarioEspecial()]
 
     def check_permission(self, request):
         tipo_usuario = getattr(request.user, 'tipousuario', None)
@@ -699,7 +714,12 @@ class DatosNivelView(APIView):
 
 class DatosRegionView(APIView):
     """CRUD para gestionar Regionales."""
-    permission_classes = [IsAuthenticated, IsSuperUserOrAdmin | IsUsuarioEspecial]
+    permission_classes = []
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return []  # GET público para el formulario de registro
+        return [IsAuthenticated(), IsSuperUserOrAdmin() | IsUsuarioEspecial()]
 
     def check_permission(self, request):
         tipo_usuario = getattr(request.user, 'tipousuario', None)

@@ -1,31 +1,55 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Building2, Save } from "lucide-react"
+import api from "@/app/services/axios"
 
 export default function OrganizacionPage() {
   const [formData, setFormData] = useState({
-    nombre: "Ambulancias Cali S.A.S",
-    nit: "900.123.456-7",
-    direccion: "Calle 5 #10-20, Cali, Valle del Cauca",
-    telefono: "(602) 123-4567",
-    email: "contacto@ambulanciascali.com",
-    representante: "Juan Carlos Rodríguez",
-    descripcion: "Empresa dedicada a la prestación de servicios de transporte asistencial básico y medicalizado en la ciudad de Cali y el Valle del Cauca.",
+    nombre: "",
+    nit: "",
+    direccion: "",
+    telefono: "",
+    email: "",
+    representante: "",
+    descripcion: "",
   })
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    api.get("api/organizacion/").then((res: { data: typeof formData & Record<string, string> }) => {
+      const d = res.data
+      setFormData({
+        nombre: d.nombre ?? "",
+        nit: d.nit ?? "",
+        direccion: d.direccion ?? "",
+        telefono: d.telefono ?? "",
+        email: d.email ?? "",
+        representante: d.representante ?? "",
+        descripcion: d.descripcion ?? "",
+      })
+    }).catch(() => {})
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSave = () => {
-    localStorage.setItem("organizacion", JSON.stringify(formData))
-    alert("Información guardada exitosamente")
+  const handleSave = async () => {
+    setLoading(true)
+    try {
+      await api.post("api/organizacion/", formData)
+      alert("Información guardada exitosamente")
+    } catch {
+      alert("Error al guardar la información")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -107,9 +131,9 @@ export default function OrganizacionPage() {
               onChange={(e) => handleInputChange("descripcion", e.target.value)}
             />
           </div>
-          <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button onClick={handleSave} disabled={loading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
             <Save className="h-4 w-4 mr-2" />
-            Guardar Cambios
+            {loading ? "Guardando..." : "Guardar Cambios"}
           </Button>
         </CardContent>
       </Card>

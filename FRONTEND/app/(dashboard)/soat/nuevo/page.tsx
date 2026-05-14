@@ -15,6 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Ambulance, User, AlertTriangle, Building2, Download, Save } from "lucide-react"
+import api from "@/app/services/axios"
 
 export default function NuevoSOATPage() {
   const [activeTab, setActiveTab] = useState("ambulancia")
@@ -106,16 +107,37 @@ Generado: ${new Date().toLocaleString("es-CO")}
     URL.revokeObjectURL(url)
   }
 
-  const handleSave = () => {
-    // Store in localStorage for now (would be database in production)
-    const registros = JSON.parse(localStorage.getItem("soat_registros") || "[]")
-    registros.push({
-      ...formData,
-      id: Date.now(),
-      fechaRegistro: new Date().toISOString(),
-    })
-    localStorage.setItem("soat_registros", JSON.stringify(registros))
-    alert("Registro guardado exitosamente")
+  const handleSave = async () => {
+    try {
+      const payload = {
+        placa_ambulancia: formData.placaAmbulancia,
+        tipo_ambulancia: formData.tipoAmbulancia,
+        tripulante1: formData.tripulante1,
+        tripulante2: formData.tripulante2,
+        nombre_paciente: formData.nombrePaciente,
+        documento_paciente: formData.documentoPaciente,
+        tipo_documento: formData.tipoDocumento,
+        edad_paciente: formData.edadPaciente,
+        genero_paciente: formData.generoPaciente,
+        direccion_paciente: formData.direccionPaciente,
+        telefono_paciente: formData.telefonoPaciente,
+        fecha_siniestro: formData.fechaSiniestro || null,
+        hora_siniestro: formData.horaSiniestro || null,
+        lugar_siniestro: formData.lugarSiniestro,
+        tipo_vehiculo: formData.tipoVehiculo,
+        placa_vehiculo: formData.placaVehiculo,
+        poliza: formData.poliza,
+        aseguradora: formData.aseguradora,
+        descripcion_siniestro: formData.descripcionSiniestro,
+        departamento: formData.departamento,
+        ciudad: formData.ciudad,
+        sede_prestadora: formData.sedePrestadora,
+      }
+      await api.post("api/soat/", payload)
+      alert("Registro guardado exitosamente")
+    } catch {
+      alert("Error al guardar el registro SOAT")
+    }
   }
 
   return (
@@ -284,9 +306,9 @@ Generado: ${new Date().toLocaleString("es-CO")}
                     <SelectValue placeholder="Seleccionar género" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="masculino">Masculino</SelectItem>
-                    <SelectItem value="femenino">Femenino</SelectItem>
-                    <SelectItem value="otro">Otro</SelectItem>
+                    <SelectItem value="M">Masculino</SelectItem>
+                    <SelectItem value="F">Femenino</SelectItem>
+                    <SelectItem value="O">Otro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

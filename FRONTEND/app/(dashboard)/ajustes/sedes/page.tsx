@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { MapPin, Plus, Pencil, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import api from "@/app/services/axios"
 
 interface Sede {
   id: number
@@ -32,43 +33,8 @@ interface Sede {
   activa: boolean
 }
 
-const initialSedes: Sede[] = [
-  {
-    id: 1,
-    nombre: "Sede Norte",
-    direccion: "Calle 70N #5-100",
-    telefono: "(602) 111-1111",
-    responsable: "María García",
-    activa: true,
-  },
-  {
-    id: 2,
-    nombre: "Sede Sur",
-    direccion: "Carrera 50 #10-25",
-    telefono: "(602) 222-2222",
-    responsable: "Pedro Martínez",
-    activa: true,
-  },
-  {
-    id: 3,
-    nombre: "Sede Este",
-    direccion: "Avenida 2E #15-30",
-    telefono: "(602) 333-3333",
-    responsable: "Ana López",
-    activa: true,
-  },
-  {
-    id: 4,
-    nombre: "Sede Oeste",
-    direccion: "Calle 13 #80-45",
-    telefono: "(602) 444-4444",
-    responsable: "Carlos Sánchez",
-    activa: false,
-  },
-]
-
 export default function SedesPage() {
-  const [sedes, setSedes] = useState<Sede[]>(initialSedes)
+  const [sedes, setSedes] = useState<Sede[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [editingSede, setEditingSede] = useState<Sede | null>(null)
   const [formData, setFormData] = useState({
@@ -77,31 +43,48 @@ export default function SedesPage() {
     telefono: "",
     responsable: "",
   })
+  const [submitting, setSubmitting] = useState(false)
+
+  const fetchSedes = async () => {
+    try {
+      const res = await api.get("api/sedes/")
+      const data = res.data.results ?? res.data
+      setSedes(data.map((s: any) => ({
+        id: s.idsede,
+        nombre: s.nombre,
+        direccion: s.direccion ?? "",
+        telefono: s.telefono ?? "",
+        responsable: s.responsable ?? "",
+        activa: s.activa,
+      })))
+    } catch {
+      setSedes([])
+    }
+  }
+
+  useEffect(() => { fetchSedes() }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = () => {
-    if (editingSede) {
-      setSedes(
-        sedes.map((s) =>
-          s.id === editingSede.id ? { ...s, ...formData } : s
-        )
-      )
-    } else {
-      setSedes([
-        ...sedes,
-        {
-          id: Date.now(),
-          ...formData,
-          activa: true,
-        },
-      ])
+  const handleSubmit = async () => {
+    setSubmitting(true)
+    try {
+      if (editingSede) {
+        await api.put(`api/sedes/${editingSede.id}/`, formData)
+      } else {
+        await api.post("api/sedes/", formData)
+      }
+      await fetchSedes()
+      setIsOpen(false)
+      setEditingSede(null)
+      setFormData({ nombre: "", direccion: "", telefono: "", responsable: "" })
+    } catch {
+      alert("Error al guardar la sede")
+    } finally {
+      setSubmitting(false)
     }
-    setIsOpen(false)
-    setEditingSede(null)
-    setFormData({ nombre: "", direccion: "", telefono: "", responsable: "" })
   }
 
   const handleEdit = (sede: Sede) => {
@@ -115,16 +98,23 @@ export default function SedesPage() {
     setIsOpen(true)
   }
 
-  const handleDelete = (id: number) => {
-    if (confirm("¿Está seguro de eliminar esta sede?")) {
-      setSedes(sedes.filter((s) => s.id !== id))
+  const handleDelete = async (id: number) => {
+    if (!confirm("¿Está seguro de eliminar esta sede?")) return
+    try {
+      await api.delete(`api/sedes/${id}/`)
+      await fetchSedes()
+    } catch {
+      alert("Error al eliminar la sede")
     }
   }
 
-  const toggleStatus = (id: number) => {
-    setSedes(
-      sedes.map((s) => (s.id === id ? { ...s, activa: !s.activa } : s))
-    )
+  const toggleStatus = async (sede: Sede) => {
+    try {
+      await api.put(`api/sedes/${sede.id}/`, { activa: !sede.activa })
+      await fetchSedes()
+    } catch {
+      alert("Error al cambiar el estado")
+    }
   }
 
   return (
@@ -192,8 +182,8 @@ export default function SedesPage() {
                   placeholder="Nombre del responsable"
                 />
               </div>
-              <Button onClick={handleSubmit} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                {editingSede ? "Guardar Cambios" : "Crear Sede"}
+              <Button onClick={handleSubmit} disabled={submitting} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+                {submitting ? "Guardando..." : editingSede ? "Guardar Cambios" : "Crear Sede"}
               </Button>
             </div>
           </DialogContent>
@@ -231,7 +221,7 @@ export default function SedesPage() {
                       <Badge
                         variant={sede.activa ? "default" : "secondary"}
                         className={sede.activa ? "bg-green-100 text-green-700 hover:bg-green-100" : ""}
-                        onClick={() => toggleStatus(sede.id)}
+                        onClick={() => toggleStatus(sede)}
                         style={{ cursor: "pointer" }}
                       >
                         {sede.activa ? "Activa" : "Inactiva"}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -78,6 +79,13 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Ingresando..." : "Ingresar"}
             </Button>
+
+            <p className="text-sm text-center text-muted-foreground">
+              ¿Nuevo en el sistema?{" "}
+              <Link href="/register" className="text-primary underline-offset-4 hover:underline">
+                Registrar usuario
+              </Link>
+            </p>
           </form>
         </CardContent>
       </Card>

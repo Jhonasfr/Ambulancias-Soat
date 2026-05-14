@@ -21,119 +21,36 @@ import {
 } from "@/components/ui/dialog"
 import { Search, Eye, Download, FileText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import api from "@/app/services/axios"
 
 interface RegistroSOAT {
-  id: number
-  fechaRegistro: string
-  placaAmbulancia: string
-  nombrePaciente: string
-  documentoPaciente: string
-  tipoDocumento: string
-  fechaSiniestro: string
-  lugarSiniestro: string
-  tipoVehiculo: string
+  idregistro: number
+  fecha_registro: string
+  placa_ambulancia: string
+  nombre_paciente: string
+  documento_paciente: string
+  tipo_documento: string
+  fecha_siniestro: string
+  lugar_siniestro: string
+  tipo_vehiculo: string
   aseguradora: string
-  sedePrestadora: string
+  sede_prestadora: string
   tripulante1: string
   tripulante2: string
-  sede: string
-  edadPaciente: string
-  generoPaciente: string
-  direccionPaciente: string
-  telefonoPaciente: string
-  horaSiniestro: string
-  placaVehiculo: string
+  sede: number | null
+  sede_nombre: string
+  edad_paciente: string
+  genero_paciente: string
+  direccion_paciente: string
+  telefono_paciente: string
+  hora_siniestro: string
+  placa_vehiculo: string
   poliza: string
-  descripcionSiniestro: string
+  descripcion_siniestro: string
   departamento: string
   ciudad: string
-  tipoAmbulancia: string
+  tipo_ambulancia: string
 }
-
-// Sample data for demonstration
-const sampleData: RegistroSOAT[] = [
-  {
-    id: 1,
-    fechaRegistro: "2024-03-20T10:30:00",
-    placaAmbulancia: "AMB-001",
-    nombrePaciente: "Juan Carlos Pérez",
-    documentoPaciente: "1234567890",
-    tipoDocumento: "CC",
-    fechaSiniestro: "2024-03-20",
-    lugarSiniestro: "Calle 5 con Carrera 15",
-    tipoVehiculo: "motocicleta",
-    aseguradora: "sura",
-    sedePrestadora: "huv",
-    tripulante1: "Carlos Martínez",
-    tripulante2: "María López",
-    sede: "sede-norte",
-    edadPaciente: "35",
-    generoPaciente: "masculino",
-    direccionPaciente: "Calle 10 #5-20",
-    telefonoPaciente: "3001234567",
-    horaSiniestro: "08:30",
-    placaVehiculo: "ABC-123",
-    poliza: "POL-001234",
-    descripcionSiniestro: "Colisión con vehículo particular",
-    departamento: "valle",
-    ciudad: "cali",
-    tipoAmbulancia: "medicalizada",
-  },
-  {
-    id: 2,
-    fechaRegistro: "2024-03-19T14:15:00",
-    placaAmbulancia: "AMB-002",
-    nombrePaciente: "Ana María García",
-    documentoPaciente: "9876543210",
-    tipoDocumento: "CC",
-    fechaSiniestro: "2024-03-19",
-    lugarSiniestro: "Autopista Sur-Oriental Km 5",
-    tipoVehiculo: "automovil",
-    aseguradora: "bolivar",
-    sedePrestadora: "valle-lili",
-    tripulante1: "Pedro Sánchez",
-    tripulante2: "Laura Gómez",
-    sede: "sede-sur",
-    edadPaciente: "28",
-    generoPaciente: "femenino",
-    direccionPaciente: "Carrera 8 #20-15",
-    telefonoPaciente: "3109876543",
-    horaSiniestro: "13:45",
-    placaVehiculo: "XYZ-789",
-    poliza: "POL-005678",
-    descripcionSiniestro: "Accidente múltiple en autopista",
-    departamento: "valle",
-    ciudad: "cali",
-    tipoAmbulancia: "uci",
-  },
-  {
-    id: 3,
-    fechaRegistro: "2024-03-18T09:00:00",
-    placaAmbulancia: "AMB-001",
-    nombrePaciente: "Roberto Díaz",
-    documentoPaciente: "5678901234",
-    tipoDocumento: "CC",
-    fechaSiniestro: "2024-03-18",
-    lugarSiniestro: "Avenida 6N con Calle 25",
-    tipoVehiculo: "peaton",
-    aseguradora: "allianz",
-    sedePrestadora: "imbanaco",
-    tripulante1: "Carlos Martínez",
-    tripulante2: "María López",
-    sede: "sede-norte",
-    edadPaciente: "45",
-    generoPaciente: "masculino",
-    direccionPaciente: "Calle 25 #6N-30",
-    telefonoPaciente: "3205678901",
-    horaSiniestro: "07:30",
-    placaVehiculo: "N/A",
-    poliza: "POL-009012",
-    descripcionSiniestro: "Atropellamiento en paso peatonal",
-    departamento: "valle",
-    ciudad: "cali",
-    tipoAmbulancia: "basica",
-  },
-]
 
 const vehicleLabels: Record<string, string> = {
   motocicleta: "Motocicleta",
@@ -153,90 +70,58 @@ const aseguradoraLabels: Record<string, string> = {
   axa: "AXA Colpatria",
 }
 
-const sedeLabels: Record<string, string> = {
-  huv: "Hospital Universitario del Valle",
-  imbanaco: "Clínica Imbanaco",
-  "valle-lili": "Fundación Valle del Lili",
-  comfandi: "Clínica Comfandi",
-  "isaias-duarte": "Hospital Isaías Duarte Cancino",
-}
-
 export default function HistorialPage() {
   const [registros, setRegistros] = useState<RegistroSOAT[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedRegistro, setSelectedRegistro] = useState<RegistroSOAT | null>(null)
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 10
 
-  useEffect(() => {
-    // Load from localStorage or use sample data
-    const stored = localStorage.getItem("soat_registros")
-    if (stored) {
-      const parsed = JSON.parse(stored)
-      setRegistros([...sampleData, ...parsed])
-    } else {
-      setRegistros(sampleData)
+  const fetchRegistros = async (search = "", pg = 1) => {
+    try {
+      const res = await api.get("api/soat/", {
+        params: { search, page: pg, page_size: PAGE_SIZE },
+      })
+      setRegistros(res.data.results ?? [])
+      setTotal(res.data.count ?? 0)
+    } catch {
+      setRegistros([])
     }
-  }, [])
+  }
 
-  const filteredRegistros = registros.filter(
-    (registro) =>
-      registro.nombrePaciente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      registro.documentoPaciente.includes(searchTerm) ||
-      registro.placaAmbulancia.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  useEffect(() => { fetchRegistros(searchTerm, page) }, [page])
 
-  const exportRegistro = (registro: RegistroSOAT) => {
-    const content = `
-REGISTRO SOAT - Sistema de Ambulancias Cali
-==========================================
+  const handleSearch = () => {
+    setPage(1)
+    fetchRegistros(searchTerm, 1)
+  }
 
-DATOS DE AMBULANCIA
--------------------
-Placa: ${registro.placaAmbulancia}
-Tipo: ${registro.tipoAmbulancia}
-Tripulante 1: ${registro.tripulante1}
-Tripulante 2: ${registro.tripulante2}
-Sede: ${registro.sede}
+  const openDetail = async (registro: RegistroSOAT) => {
+    try {
+      const res = await api.get(`api/soat/${registro.idregistro}/`)
+      setSelectedRegistro(res.data)
+    } catch {
+      setSelectedRegistro(registro)
+    }
+  }
 
-DATOS DEL PACIENTE
-------------------
-Nombre: ${registro.nombrePaciente}
-Documento: ${registro.tipoDocumento} ${registro.documentoPaciente}
-Edad: ${registro.edadPaciente}
-Género: ${registro.generoPaciente}
-Dirección: ${registro.direccionPaciente}
-Teléfono: ${registro.telefonoPaciente}
-
-DATOS DEL SINIESTRO
--------------------
-Fecha: ${registro.fechaSiniestro}
-Hora: ${registro.horaSiniestro}
-Lugar: ${registro.lugarSiniestro}
-Tipo de Vehículo: ${vehicleLabels[registro.tipoVehiculo] || registro.tipoVehiculo}
-Placa Vehículo: ${registro.placaVehiculo}
-Póliza: ${registro.poliza}
-Aseguradora: ${aseguradoraLabels[registro.aseguradora] || registro.aseguradora}
-Descripción: ${registro.descripcionSiniestro}
-
-DATOS IPS
----------
-Departamento: ${registro.departamento}
-Ciudad: ${registro.ciudad}
-Sede Prestadora: ${sedeLabels[registro.sedePrestadora] || registro.sedePrestadora}
-
-==========================================
-Registro ID: ${registro.id}
-Fecha de Registro: ${new Date(registro.fechaRegistro).toLocaleString("es-CO")}
-    `.trim()
-
-    const blob = new Blob([content], { type: "text/plain" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `SOAT_${registro.documentoPaciente}_${registro.fechaSiniestro}.txt`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+  const exportRegistro = async (registro: RegistroSOAT) => {
+    try {
+      const res = await api.get(`api/soat/${registro.idregistro}/exportar/`, {
+        responseType: "blob",
+      })
+      const url = URL.createObjectURL(new Blob([res.data], { type: "text/plain" }))
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `SOAT_${registro.documento_paciente}_${registro.fecha_siniestro}.txt`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {
+      alert("Error al exportar el registro")
+    }
   }
 
   return (
@@ -253,16 +138,22 @@ Fecha de Registro: ${new Date(registro.fechaRegistro).toLocaleString("es-CO")}
           <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-foreground">
               <FileText className="h-5 w-5 text-primary" />
-              Registros
+              Registros ({total})
             </div>
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nombre, documento o placa..."
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nombre, documento o placa..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                />
+              </div>
+              <Button onClick={handleSearch} variant="outline" size="icon">
+                <Search className="h-4 w-4" />
+              </Button>
             </div>
           </CardTitle>
         </CardHeader>
@@ -276,36 +167,38 @@ Fecha de Registro: ${new Date(registro.fechaRegistro).toLocaleString("es-CO")}
                   <TableHead>Paciente</TableHead>
                   <TableHead className="hidden md:table-cell">Documento</TableHead>
                   <TableHead className="hidden lg:table-cell">Tipo Vehículo</TableHead>
-                  <TableHead className="hidden lg:table-cell">IPS</TableHead>
+                  <TableHead className="hidden lg:table-cell">Sede</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRegistros.length === 0 ? (
+                {registros.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No se encontraron registros
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredRegistros.map((registro) => (
-                    <TableRow key={registro.id}>
+                  registros.map((registro) => (
+                    <TableRow key={registro.idregistro}>
                       <TableCell>
-                        {new Date(registro.fechaSiniestro).toLocaleDateString("es-CO")}
+                        {registro.fecha_siniestro
+                          ? new Date(registro.fecha_siniestro).toLocaleDateString("es-CO")
+                          : "—"}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{registro.placaAmbulancia}</Badge>
+                        <Badge variant="secondary">{registro.placa_ambulancia}</Badge>
                       </TableCell>
-                      <TableCell className="font-medium">{registro.nombrePaciente}</TableCell>
+                      <TableCell className="font-medium">{registro.nombre_paciente}</TableCell>
                       <TableCell className="hidden md:table-cell">
-                        {registro.tipoDocumento} {registro.documentoPaciente}
+                        {registro.tipo_documento} {registro.documento_paciente}
                       </TableCell>
                       <TableCell className="hidden lg:table-cell">
-                        {vehicleLabels[registro.tipoVehiculo] || registro.tipoVehiculo}
+                        {vehicleLabels[registro.tipo_vehiculo] || registro.tipo_vehiculo}
                       </TableCell>
                       <TableCell className="hidden lg:table-cell">
                         <span className="truncate max-w-[150px] block">
-                          {sedeLabels[registro.sedePrestadora] || registro.sedePrestadora}
+                          {registro.sede_nombre || registro.sede_prestadora || "—"}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -315,7 +208,7 @@ Fecha de Registro: ${new Date(registro.fechaRegistro).toLocaleString("es-CO")}
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setSelectedRegistro(registro)}
+                                onClick={() => openDetail(registro)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
@@ -329,28 +222,28 @@ Fecha de Registro: ${new Date(registro.fechaRegistro).toLocaleString("es-CO")}
                                   <div className="grid grid-cols-2 gap-4">
                                     <div>
                                       <h4 className="font-semibold text-primary mb-2">Ambulancia</h4>
-                                      <p className="text-sm text-foreground">Placa: {selectedRegistro.placaAmbulancia}</p>
+                                      <p className="text-sm text-foreground">Placa: {selectedRegistro.placa_ambulancia}</p>
                                       <p className="text-sm text-foreground">Tripulante 1: {selectedRegistro.tripulante1}</p>
                                       <p className="text-sm text-foreground">Tripulante 2: {selectedRegistro.tripulante2}</p>
                                     </div>
                                     <div>
                                       <h4 className="font-semibold text-primary mb-2">Paciente</h4>
-                                      <p className="text-sm text-foreground">Nombre: {selectedRegistro.nombrePaciente}</p>
-                                      <p className="text-sm text-foreground">Doc: {selectedRegistro.tipoDocumento} {selectedRegistro.documentoPaciente}</p>
-                                      <p className="text-sm text-foreground">Edad: {selectedRegistro.edadPaciente} años</p>
+                                      <p className="text-sm text-foreground">Nombre: {selectedRegistro.nombre_paciente}</p>
+                                      <p className="text-sm text-foreground">Doc: {selectedRegistro.tipo_documento} {selectedRegistro.documento_paciente}</p>
+                                      <p className="text-sm text-foreground">Edad: {selectedRegistro.edad_paciente} años</p>
                                     </div>
                                   </div>
                                   <div>
                                     <h4 className="font-semibold text-primary mb-2">Siniestro</h4>
-                                    <p className="text-sm text-foreground">Fecha: {selectedRegistro.fechaSiniestro} {selectedRegistro.horaSiniestro}</p>
-                                    <p className="text-sm text-foreground">Lugar: {selectedRegistro.lugarSiniestro}</p>
-                                    <p className="text-sm text-foreground">Tipo: {vehicleLabels[selectedRegistro.tipoVehiculo]}</p>
-                                    <p className="text-sm text-foreground">Aseguradora: {aseguradoraLabels[selectedRegistro.aseguradora]}</p>
-                                    <p className="text-sm text-muted-foreground mt-2">{selectedRegistro.descripcionSiniestro}</p>
+                                    <p className="text-sm text-foreground">Fecha: {selectedRegistro.fecha_siniestro} {selectedRegistro.hora_siniestro}</p>
+                                    <p className="text-sm text-foreground">Lugar: {selectedRegistro.lugar_siniestro}</p>
+                                    <p className="text-sm text-foreground">Tipo: {vehicleLabels[selectedRegistro.tipo_vehiculo] || selectedRegistro.tipo_vehiculo}</p>
+                                    <p className="text-sm text-foreground">Aseguradora: {aseguradoraLabels[selectedRegistro.aseguradora] || selectedRegistro.aseguradora}</p>
+                                    <p className="text-sm text-muted-foreground mt-2">{selectedRegistro.descripcion_siniestro}</p>
                                   </div>
                                   <div>
                                     <h4 className="font-semibold text-primary mb-2">IPS</h4>
-                                    <p className="text-sm text-foreground">{sedeLabels[selectedRegistro.sedePrestadora]}</p>
+                                    <p className="text-sm text-foreground">{selectedRegistro.sede_prestadora}</p>
                                     <p className="text-sm text-muted-foreground">{selectedRegistro.ciudad}, {selectedRegistro.departamento}</p>
                                   </div>
                                 </div>
@@ -372,6 +265,32 @@ Fecha de Registro: ${new Date(registro.fechaRegistro).toLocaleString("es-CO")}
               </TableBody>
             </Table>
           </div>
+
+          {total > PAGE_SIZE && (
+            <div className="flex items-center justify-between mt-4">
+              <p className="text-sm text-muted-foreground">
+                Página {page} de {Math.ceil(total / PAGE_SIZE)}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => p - 1)}
+                >
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= Math.ceil(total / PAGE_SIZE)}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Siguiente
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

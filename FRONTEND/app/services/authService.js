@@ -12,6 +12,12 @@ const login = async (data) => {
   });
 };
 
+// Registrar nuevo usuario (requiere autenticación de administrador)
+const register = async (data) => {
+  const response = await api.post('user/register/', data);
+  return response.data;
+};
+
 // Cerrar sesión
 const logout = () => {
   localStorage.removeItem('user');
@@ -20,6 +26,7 @@ const logout = () => {
 const authService = {
   login,
   logout,
+  register,
 };
 
 export default authService;
