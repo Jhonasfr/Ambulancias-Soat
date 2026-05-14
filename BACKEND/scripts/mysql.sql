@@ -32,7 +32,7 @@ CREATE TABLE `ambulancia` (
   UNIQUE KEY `placa` (`placa`),
   KEY `ambulancia_sede_id_9c795b1e_fk_sede_idsede` (`sede_id`),
   CONSTRAINT `ambulancia_sede_id_9c795b1e_fk_sede_idsede` FOREIGN KEY (`sede_id`) REFERENCES `sede` (`idsede`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,6 +41,7 @@ CREATE TABLE `ambulancia` (
 
 LOCK TABLES `ambulancia` WRITE;
 /*!40000 ALTER TABLE `ambulancia` DISABLE KEYS */;
+INSERT INTO `ambulancia` VALUES (24,'BCH001','MAT',1,83),(25,'B508061','BAT',1,83),(26,'B508062','BAT',1,83),(27,'B508063','BAT',1,83),(28,'B508064','BAT',1,83),(29,'B508065','BAT',1,83),(30,'B508066','BAT',1,83),(31,'B508067','BAT',1,83),(32,'B508068','BAT',1,83),(33,'B508069','BAT',1,83),(34,'B508070','BAT',1,83),(35,'B508071','BAT',1,83),(36,'B508072','BAT',1,83),(37,'B508073','BAT',1,83),(38,'B508074','BAT',1,83),(39,'B508075','BAT',1,83),(40,'B508076','BAT',1,83),(41,'B508077','BAT',1,83),(42,'B508078','BAT',1,83),(43,'B508079','BAT',1,83),(44,'B508080','BAT',1,83);
 /*!40000 ALTER TABLE `ambulancia` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -162,7 +163,7 @@ CREATE TABLE `cargo` (
   `nombrecargo` varchar(30) NOT NULL,
   `estadocargo` int NOT NULL,
   PRIMARY KEY (`idcargo`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -171,6 +172,7 @@ CREATE TABLE `cargo` (
 
 LOCK TABLES `cargo` WRITE;
 /*!40000 ALTER TABLE `cargo` DISABLE KEYS */;
+INSERT INTO `cargo` VALUES (48,'BenchCargo',1),(49,'BenchCargoUpd',1),(50,'BenchCargo508121',1),(51,'BenchCargo508122',1),(52,'BenchCargo508123',1),(53,'BenchCargo508124',1),(54,'BenchCargo508125',1),(55,'BenchCargo508126',1),(56,'BenchCargo508127',1),(57,'BenchCargo508128',1),(58,'BenchCargo508129',1),(59,'BenchCargo508130',1),(60,'BenchCargo508131',1),(61,'BenchCargo508132',1),(62,'BenchCargo508133',1),(63,'BenchCargo508134',1),(64,'BenchCargo508135',1),(65,'BenchCargo508136',1),(66,'BenchCargo508137',1),(67,'BenchCargo508138',1),(68,'BenchCargo508139',1),(69,'BenchCargo508140',1);
 /*!40000 ALTER TABLE `cargo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -203,7 +205,7 @@ CREATE TABLE `colaboradores` (
   CONSTRAINT `colaboradores_nivelcolaborador_id_2385eea6_fk_niveles_idnivel` FOREIGN KEY (`nivelcolaborador_id`) REFERENCES `niveles` (`idnivel`),
   CONSTRAINT `colaboradores_regionalcolab_id_e437f3b7_fk_regional_idregional` FOREIGN KEY (`regionalcolab_id`) REFERENCES `regional` (`idregional`),
   CONSTRAINT `colaboradores_sede_id_1e6a98c8_fk_sede_idsede` FOREIGN KEY (`sede_id`) REFERENCES `sede` (`idsede`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -212,6 +214,7 @@ CREATE TABLE `colaboradores` (
 
 LOCK TABLES `colaboradores` WRITE;
 /*!40000 ALTER TABLE `colaboradores` DISABLE KEYS */;
+INSERT INTO `colaboradores` VALUES (3,'00000001','Bench','User','bench@bench.com','3000000000',1,48,48,48,NULL);
 /*!40000 ALTER TABLE `colaboradores` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -339,7 +342,7 @@ CREATE TABLE `niveles` (
   `estadonivel` int NOT NULL,
   `prom` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`idnivel`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -348,6 +351,7 @@ CREATE TABLE `niveles` (
 
 LOCK TABLES `niveles` WRITE;
 /*!40000 ALTER TABLE `niveles` DISABLE KEYS */;
+INSERT INTO `niveles` VALUES (48,'BenchNivel',1,NULL),(49,'BenchNivelUpd',1,NULL),(50,'BenchNivel508161',1,NULL),(51,'BenchNivel508162',1,NULL),(52,'BenchNivel508163',1,NULL),(53,'BenchNivel508164',1,NULL),(54,'BenchNivel508165',1,NULL),(55,'BenchNivel508166',1,NULL),(56,'BenchNivel508167',1,NULL),(57,'BenchNivel508168',1,NULL),(58,'BenchNivel508169',1,NULL),(59,'BenchNivel508170',1,NULL),(60,'BenchNivel508171',1,NULL),(61,'BenchNivel508172',1,NULL),(62,'BenchNivel508173',1,NULL),(63,'BenchNivel508174',1,NULL),(64,'BenchNivel508175',1,NULL),(65,'BenchNivel508176',1,NULL),(66,'BenchNivel508177',1,NULL),(67,'BenchNivel508178',1,NULL),(68,'BenchNivel508179',1,NULL),(69,'BenchNivel508180',1,NULL);
 /*!40000 ALTER TABLE `niveles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -369,7 +373,7 @@ CREATE TABLE `organizacion` (
   `descripcion` longtext,
   PRIMARY KEY (`idorganizacion`),
   UNIQUE KEY `nit` (`nit`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -378,6 +382,7 @@ CREATE TABLE `organizacion` (
 
 LOCK TABLES `organizacion` WRITE;
 /*!40000 ALTER TABLE `organizacion` DISABLE KEYS */;
+INSERT INTO `organizacion` VALUES (1,'Org Bench','900-1',NULL,NULL,NULL,NULL,NULL),(4,'Org Test Benchmark','999-9',NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `organizacion` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -393,7 +398,7 @@ CREATE TABLE `regional` (
   `nombreregional` varchar(30) NOT NULL,
   `estadoregional` int NOT NULL,
   PRIMARY KEY (`idregional`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -402,6 +407,7 @@ CREATE TABLE `regional` (
 
 LOCK TABLES `regional` WRITE;
 /*!40000 ALTER TABLE `regional` DISABLE KEYS */;
+INSERT INTO `regional` VALUES (48,'BenchRegional',1),(49,'BenchRegionUpd',1),(50,'BenchRegion508201',1),(51,'BenchRegion508202',1),(52,'BenchRegion508203',1),(53,'BenchRegion508204',1),(54,'BenchRegion508205',1),(55,'BenchRegion508206',1),(56,'BenchRegion508207',1),(57,'BenchRegion508208',1),(58,'BenchRegion508209',1),(59,'BenchRegion508210',1),(60,'BenchRegion508211',1),(61,'BenchRegion508212',1),(62,'BenchRegion508213',1),(63,'BenchRegion508214',1),(64,'BenchRegion508215',1),(65,'BenchRegion508216',1),(66,'BenchRegion508217',1),(67,'BenchRegion508218',1),(68,'BenchRegion508219',1),(69,'BenchRegion508220',1);
 /*!40000 ALTER TABLE `regional` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -447,7 +453,7 @@ CREATE TABLE `registro_soat` (
   CONSTRAINT `registro_soat_ambulancia_id_095e6328_fk_ambulancia_idambulancia` FOREIGN KEY (`ambulancia_id`) REFERENCES `ambulancia` (`idambulancia`),
   CONSTRAINT `registro_soat_registrado_por_id_55dab3fe_fk_usuarios_id` FOREIGN KEY (`registrado_por_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `registro_soat_sede_id_5383d9ed_fk_sede_idsede` FOREIGN KEY (`sede_id`) REFERENCES `sede` (`idsede`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -456,6 +462,7 @@ CREATE TABLE `registro_soat` (
 
 LOCK TABLES `registro_soat` WRITE;
 /*!40000 ALTER TABLE `registro_soat` DISABLE KEYS */;
+INSERT INTO `registro_soat` VALUES (1,'BCH001','BAT','','','Actualizado','07269347','CC','','','','',NULL,NULL,'','','','','','','','','','2026-04-28 20:14:29.347219',NULL,NULL,NULL),(2,'BCH001','BAT','','','Actualizado','07326707','CC','','','','',NULL,NULL,'','','','','','','','','','2026-04-28 20:15:26.707839',NULL,NULL,NULL),(3,'BCH001','BAT','','','Actualizado','07354524','CC','','','','',NULL,NULL,'','','','','','','','','','2026-04-28 20:15:54.524696',NULL,NULL,NULL),(4,'BCH001','BAT','','','Actualizado','07423129','CC','','','','',NULL,NULL,'','','','','','','','','','2026-04-28 20:17:03.129638',NULL,NULL,NULL),(5,'BCH001','BAT','','','Actualizado','07508667','CC','','','','',NULL,NULL,'','','','','','','','','','2026-04-28 20:18:28.667910',24,4,83);
 /*!40000 ALTER TABLE `registro_soat` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -474,7 +481,7 @@ CREATE TABLE `sede` (
   `responsable` varchar(100) DEFAULT NULL,
   `activa` tinyint(1) NOT NULL,
   PRIMARY KEY (`idsede`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -483,6 +490,7 @@ CREATE TABLE `sede` (
 
 LOCK TABLES `sede` WRITE;
 /*!40000 ALTER TABLE `sede` DISABLE KEYS */;
+INSERT INTO `sede` VALUES (2,'S Bench POST','X','300','A',1),(3,'S Bench POST','X','300','A',1),(4,'S Bench POST','X','300','A',1),(5,'S Bench POST','X','300','A',1),(6,'S Bench POST','X','300','A',1),(7,'S Bench POST','X','300','A',1),(8,'S Bench POST','X','300','A',1),(9,'S Bench POST','X','300','A',1),(10,'S Bench POST','X','300','A',1),(11,'S Bench POST','X','300','A',1),(12,'S Bench POST','X','300','A',1),(13,'S Bench POST','X','300','A',1),(14,'S Bench POST','X','300','A',1),(15,'S Bench POST','X','300','A',1),(16,'S Bench POST','X','300','A',1),(17,'S Bench POST','X','300','A',1),(18,'S Bench POST','X','300','A',1),(19,'S Bench POST','X','300','A',1),(20,'S Bench POST','X','300','A',1),(21,'S Bench POST','X','300','A',1),(22,'S Bench POST','X','300','A',1),(23,'S Bench POST','X','300','A',1),(24,'S Bench POST','X','300','A',1),(25,'S Bench POST','X','300','A',1),(26,'S Bench POST','X','300','A',1),(27,'S Bench POST','X','300','A',1),(28,'S Bench POST','X','300','A',1),(29,'S Bench POST','X','300','A',1),(30,'S Bench POST','X','300','A',1),(31,'S Bench POST','X','300','A',1),(32,'S Bench POST','X','300','A',1),(33,'S Bench POST','X','300','A',1),(34,'S Bench POST','X','300','A',1),(35,'S Bench POST','X','300','A',1),(36,'S Bench POST','X','300','A',1),(37,'S Bench POST','X','300','A',1),(38,'S Bench POST','X','300','A',1),(39,'S Bench POST','X','300','A',1),(40,'S Bench POST','X','300','A',1),(41,'S Bench POST','X','300','A',1),(42,'S Bench POST','X','300','A',1),(43,'S Bench POST','X','300','A',1),(44,'S Bench POST','X','300','A',1),(45,'S Bench POST','X','300','A',1),(46,'S Bench POST','X','300','A',1),(47,'S Bench POST','X','300','A',1),(48,'S Bench POST','X','300','A',1),(49,'S Bench POST','X','300','A',1),(50,'S Bench POST','X','300','A',1),(51,'S Bench POST','X','300','A',1),(52,'S Bench POST','X','300','A',1),(53,'S Bench POST','X','300','A',1),(54,'S Bench POST','X','300','A',1),(55,'S Bench POST','X','300','A',1),(56,'S Bench POST','X','300','A',1),(57,'S Bench POST','X','300','A',1),(58,'S Bench POST','X','300','A',1),(59,'S Bench POST','X','300','A',1),(60,'S Bench POST','X','300','A',1),(61,'S Bench POST','X','300','A',1),(63,'S Bench POST','X','300','A',1),(64,'S Bench POST','X','300','A',1),(65,'S Bench POST','X','300','A',1),(66,'S Bench POST','X','300','A',1),(67,'S Bench POST','X','300','A',1),(68,'S Bench POST','X','300','A',1),(69,'S Bench POST','X','300','A',1),(70,'S Bench POST','X','300','A',1),(71,'S Bench POST','X','300','A',1),(72,'S Bench POST','X','300','A',1),(73,'S Bench POST','X','300','A',1),(74,'S Bench POST','X','300','A',1),(75,'S Bench POST','X','300','A',1),(76,'S Bench POST','X','300','A',1),(77,'S Bench POST','X','300','A',1),(78,'S Bench POST','X','300','A',1),(79,'S Bench POST','X','300','A',1),(80,'S Bench POST','X','300','A',1),(81,'S Bench POST','X','300','A',1),(82,'S Bench POST','X','300','A',1),(83,'Sede Benchmark','Av. Benchmark 100','3001000000','Nuevo',1),(84,'S Bench POST','X','300','A',1),(85,'S Bench POST','X','300','A',1),(86,'S Bench POST','X','300','A',1),(87,'S Bench POST','X','300','A',1),(88,'S Bench POST','X','300','A',1),(89,'S Bench POST','X','300','A',1),(90,'S Bench POST','X','300','A',1),(91,'S Bench POST','X','300','A',1),(92,'S Bench POST','X','300','A',1),(93,'S Bench POST','X','300','A',1),(94,'S Bench POST','X','300','A',1),(95,'S Bench POST','X','300','A',1),(96,'S Bench POST','X','300','A',1),(97,'S Bench POST','X','300','A',1),(98,'S Bench POST','X','300','A',1),(99,'S Bench POST','X','300','A',1),(100,'S Bench POST','X','300','A',1),(101,'S Bench POST','X','300','A',1),(102,'S Bench POST','X','300','A',1),(103,'S Bench POST','X','300','A',1);
 /*!40000 ALTER TABLE `sede` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -505,7 +513,7 @@ CREATE TABLE `usuarios` (
   UNIQUE KEY `usuario` (`usuario`),
   KEY `usuarios_idcolaboradoru_id_e5c23ccf_fk_colaborad` (`idcolaboradoru_id`),
   CONSTRAINT `usuarios_idcolaboradoru_id_e5c23ccf_fk_colaborad` FOREIGN KEY (`idcolaboradoru_id`) REFERENCES `colaboradores` (`idcolaborador`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -514,6 +522,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
+INSERT INTO `usuarios` VALUES (NULL,4,'bench_usr','pbkdf2_sha256$1000000$4fc9GfrVBf7zLaf1DgNYD8$tuQL4peJwYLL/NpZ8MF69rKcCuymmxYdNh0pcapc6rI=',1,4,3);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -530,4 +539,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-14 14:06:48
+-- Dump completed on 2026-05-13 21:18:32

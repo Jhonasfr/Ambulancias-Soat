@@ -12,6 +12,7 @@ interface AuthResponse {
 }
 
 interface AuthService {
+  register: any;
   login(data: LoginData): Promise<AuthResponse>;
   logout(): void;
 }

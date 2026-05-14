@@ -896,3 +896,209 @@ class ReporteUsuariosTests(APITestCase):
         resp = self.client.get(self.url)
         self.assertIn("Content-Disposition", resp)
         self.assertIn(".xlsx", resp["Content-Disposition"])
+
+
+# ──────────────────────────────────────────────
+#  FLUJO COMPLETO: REGISTRO + LOGIN
+# ──────────────────────────────────────────────
+
+class RegistroCompletoYLoginTests(APITestCase):
+    """
+    Pruebas de extremo a extremo que replican exactamente el flujo del frontend:
+
+      1. El formulario de registro carga las opciones (Cargo, Nivel, Regional).
+      2. El usuario completa el form y se envía el payload al backend.
+      3. Se verifica que el colaborador se creó con los FK correctos.
+      4. Se verifica que el usuario puede hacer login y recibe los tokens JWT.
+    """
+
+    def setUp(self):
+        self.client = APIClient()
+        self.cargo = _crear_cargo("Conductor")
+        self.nivel = _crear_nivel("Avanzado")
+        self.regional = _crear_regional("Cali")
+
+        self.url_register = reverse("register")
+        self.url_token = reverse("token_obtain_pair")
+        self.url_cargo = reverse("datos-cargo")
+        self.url_nivel = reverse("datos-nivel")
+        self.url_region = reverse("datos-region")
+
+    # ── 1. Opciones del formulario ─────────────────────────────────────────
+
+    def test_get_cargos_retorna_lista_con_nombre(self):
+        """El frontend llama a /user/Cargo/ para poblar el <Select> de cargos."""
+        resp = self.client.get(self.url_cargo)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.data.get("results", resp.data)
+        nombres = [c["nombrecargo"] for c in data]
+        self.assertIn("Conductor", nombres)
+
+    def test_get_niveles_retorna_lista_con_nombre(self):
+        """El frontend llama a /user/Nivel/ para poblar el <Select> de niveles."""
+        resp = self.client.get(self.url_nivel)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.data.get("results", resp.data)
+        nombres = [n["nombrenivel"] for n in data]
+        self.assertIn("Avanzado", nombres)
+
+    def test_get_regionales_retorna_lista_con_nombre(self):
+        """El frontend llama a /user/Region/ para poblar el <Select> de regionales."""
+        resp = self.client.get(self.url_region)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.data.get("results", resp.data)
+        nombres = [r["nombreregional"] for r in data]
+        self.assertIn("Cali", nombres)
+
+    def test_get_cargos_incluye_id_y_nombre(self):
+        """Cada cargo debe exponer idcargo y nombrecargo (campos que usa el frontend)."""
+        resp = self.client.get(self.url_cargo)
+        data = resp.data.get("results", resp.data)
+        self.assertTrue(len(data) > 0)
+        primer = data[0]
+        self.assertIn("idcargo", primer)
+        self.assertIn("nombrecargo", primer)
+
+    def test_get_niveles_incluye_id_y_nombre(self):
+        resp = self.client.get(self.url_nivel)
+        data = resp.data.get("results", resp.data)
+        self.assertTrue(len(data) > 0)
+        primer = data[0]
+        self.assertIn("idnivel", primer)
+        self.assertIn("nombrenivel", primer)
+
+    def test_get_regionales_incluye_id_y_nombre(self):
+        resp = self.client.get(self.url_region)
+        data = resp.data.get("results", resp.data)
+        self.assertTrue(len(data) > 0)
+        primer = data[0]
+        self.assertIn("idregional", primer)
+        self.assertIn("nombreregional", primer)
+
+    # ── 2. Payload exacto que envía el frontend ────────────────────────────
+
+    def _payload_frontend(self, usuario="nuevo_conductor", cc="99887766"):
+        """Replica el objeto `payload` construido en register/page.tsx → handleSubmit."""
+        return {
+            "usuario": usuario,
+            "password": "Segura@2026",
+            "idcolaborador": {
+                "cc_colaborador": cc,
+                "nombre_colaborador": "Carlos",
+                "apellido_colaborador": "Pérez",
+                "correo_colaborador": f"{cc}@ambulancias.com",
+                "telefo_colaborador": "3209876543",
+                "cargo_colaborador": self.cargo.idcargo,
+                "nivel_colaborador": self.nivel.idnivel,
+                "regional_colab": self.regional.idregional,
+            },
+        }
+
+    def test_registro_retorna_201_con_ids(self):
+        """POST con payload de frontend devuelve 201 y los IDs creados."""
+        resp = self.client.post(self.url_register, self._payload_frontend(), format="json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        body = resp.json()
+        self.assertIn("usuario_id", body)
+        self.assertIn("colaborador_id", body)
+
+    # ── 3. Verificación en base de datos ───────────────────────────────────
+
+    def test_colaborador_guarda_cargo_nivel_regional_correctos(self):
+        """El colaborador creado debe tener los FK de cargo, nivel y regional exactos."""
+        self.client.post(self.url_register, self._payload_frontend(), format="json")
+        colab = Colaboradores.objects.filter(cccolaborador="99887766").first()
+        self.assertIsNotNone(colab)
+        self.assertEqual(colab.cargocolaborador_id, self.cargo.idcargo)
+        self.assertEqual(colab.nivelcolaborador_id, self.nivel.idnivel)
+        self.assertEqual(colab.regionalcolab_id, self.regional.idregional)
+
+    def test_colaborador_guarda_nombre_apellido_correo_telefono(self):
+        self.client.post(self.url_register, self._payload_frontend(), format="json")
+        colab = Colaboradores.objects.filter(cccolaborador="99887766").first()
+        self.assertIsNotNone(colab)
+        self.assertEqual(colab.nombrecolaborador, "Carlos")
+        self.assertEqual(colab.apellidocolaborador, "Pérez")
+        self.assertEqual(colab.correocolaborador, "99887766@ambulancias.com")
+        self.assertEqual(colab.telefocolaborador, "3209876543")
+
+    def test_usuario_creado_activo_y_contrasena_hasheada(self):
+        """El usuario debe quedar activo (estadousuario=1) y la contraseña hasheada."""
+        self.client.post(self.url_register, self._payload_frontend(), format="json")
+        user = Usuarios.objects.filter(usuario="nuevo_conductor").first()
+        self.assertIsNotNone(user)
+        self.assertEqual(user.estadousuario, 1)
+        self.assertNotEqual(user.password, "Segura@2026")
+        self.assertTrue(user.check_password("Segura@2026"))
+
+    def test_usuario_vinculado_al_colaborador_correcto(self):
+        """El usuario debe estar vinculado al colaborador recién creado."""
+        self.client.post(self.url_register, self._payload_frontend(), format="json")
+        colab = Colaboradores.objects.filter(cccolaborador="99887766").first()
+        user = Usuarios.objects.filter(usuario="nuevo_conductor").first()
+        self.assertIsNotNone(user)
+        self.assertEqual(user.idcolaboradoru_id, colab.idcolaborador)
+
+    # ── 4. Login tras el registro ──────────────────────────────────────────
+
+    def test_login_tras_registro_retorna_200_con_tokens(self):
+        """Después de registrar, el usuario puede hacer login y recibe access + refresh."""
+        self.client.post(self.url_register, self._payload_frontend(), format="json")
+
+        login_resp = self.client.post(
+            self.url_token,
+            {"usuario": "nuevo_conductor", "password": "Segura@2026"},
+            format="json",
+        )
+        self.assertEqual(login_resp.status_code, status.HTTP_200_OK)
+        body = login_resp.json()
+        self.assertIn("access", body)
+        self.assertIn("refresh", body)
+
+    def test_login_retorna_campo_is_admin(self):
+        """El token personalizado incluye is_admin con el tipo de usuario (0 = colaborador)."""
+        self.client.post(self.url_register, self._payload_frontend(), format="json")
+
+        login_resp = self.client.post(
+            self.url_token,
+            {"usuario": "nuevo_conductor", "password": "Segura@2026"},
+            format="json",
+        )
+        self.assertEqual(login_resp.status_code, status.HTTP_200_OK)
+        self.assertIn("is_admin", login_resp.json())
+        self.assertEqual(login_resp.json()["is_admin"], 0)
+
+    def test_login_con_contrasena_incorrecta_retorna_401(self):
+        self.client.post(self.url_register, self._payload_frontend(), format="json")
+
+        login_resp = self.client.post(
+            self.url_token,
+            {"usuario": "nuevo_conductor", "password": "Incorrecta@123"},
+            format="json",
+        )
+        self.assertEqual(login_resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_login_usuario_inexistente_retorna_401(self):
+        login_resp = self.client.post(
+            self.url_token,
+            {"usuario": "no_existe", "password": "cualquiera"},
+            format="json",
+        )
+        self.assertEqual(login_resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_registro_duplicado_impide_segundo_registro(self):
+        """Un intento de duplicar usuario falla en registro; el original sigue activo."""
+        self.client.post(self.url_register, self._payload_frontend(), format="json")
+        dup_resp = self.client.post(
+            self.url_register,
+            self._payload_frontend(usuario="nuevo_conductor", cc="11223344"),
+            format="json",
+        )
+        self.assertEqual(dup_resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+        login_resp = self.client.post(
+            self.url_token,
+            {"usuario": "nuevo_conductor", "password": "Segura@2026"},
+            format="json",
+        )
+        self.assertEqual(login_resp.status_code, status.HTTP_200_OK)
