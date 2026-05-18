@@ -108,6 +108,14 @@ export default function AmbulanciasPage() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
+  const handlePlacaChange = (raw: string) => {
+    const clean = raw.toUpperCase().replace(/[^A-Z0-9]/g, "")
+    const letters = clean.replace(/[0-9]/g, "").slice(0, 3)
+    const numbers = clean.replace(/[A-Z]/g, "").slice(0, 3)
+    const formatted = numbers.length > 0 ? `${letters}-${numbers}` : letters
+    setFormData((prev) => ({ ...prev, placa: formatted }))
+  }
+
   const handleSubmit = async () => {
     setSubmitting(true)
     try {
@@ -188,8 +196,9 @@ export default function AmbulanciasPage() {
                 <Input
                   id="placa"
                   value={formData.placa}
-                  onChange={(e) => handleInputChange("placa", e.target.value)}
-                  placeholder="AMB-XXX"
+                  onChange={(e) => handlePlacaChange(e.target.value)}
+                  placeholder="ABC-123"
+                  maxLength={7}
                 />
               </div>
               <div className="space-y-2">

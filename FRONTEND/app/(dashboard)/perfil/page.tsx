@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,51 +15,135 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { User, Mail, Phone, MapPin, Briefcase, Calendar, Save, Shield } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { getPerfil, actualizarPerfil, getSedes, type PerfilData, type Sede } from "@/app/services/ambulancia"
 
 export default function PerfilPage() {
   const [isEditing, setIsEditing] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [sedes, setSedes] = useState<Sede[]>([])
+  const [perfilOriginal, setPerfilOriginal] = useState<PerfilData | null>(null)
   const [formData, setFormData] = useState({
-    nombre: "Carlos Andrés Martínez",
-    documento: "1234567890",
-    tipoDocumento: "CC",
-    email: "carlos.martinez@ambulanciascali.com",
-    telefono: "3001234567",
-    direccion: "Calle 10 #5-20, Barrio El Poblado",
-    cargo: "Paramédico",
-    sede: "Sede Norte",
-    fechaIngreso: "2020-03-15",
-    rh: "O+",
-    contactoEmergencia: "María García - 3109876543",
-    licencia: "5678901234",
-    especialidad: "Atención Prehospitalaria",
+    nombre_colaborador: "",
+    apellido_colaborador: "",
+    cc_colaborador: "",
+    tipo_documento: "CC",
+    correo_colaborador: "",
+    telefo_colaborador: "",
+    direccion: "",
+    nombre_cargo: "",
+    nombre_sede: "",
+    sede_id: "",
+    numero_licencia: "",
+    especialidad: "",
+    tipo_sangre: "",
+    contacto_emergencia: "",
   })
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [perfil, sedesData] = await Promise.all([getPerfil(), getSedes()])
+        setPerfilOriginal(perfil)
+        setSedes(sedesData)
+        setFormData({
+          nombre_colaborador: perfil.nombre_colaborador ?? "",
+          apellido_colaborador: perfil.apellido_colaborador ?? "",
+          cc_colaborador: perfil.cc_colaborador ?? "",
+          tipo_documento: perfil.tipo_documento ?? "CC",
+          correo_colaborador: perfil.correo_colaborador ?? "",
+          telefo_colaborador: perfil.telefo_colaborador ?? "",
+          direccion: perfil.direccion ?? "",
+          nombre_cargo: perfil.nombre_cargo ?? "",
+          nombre_sede: perfil.nombre_sede ?? "",
+          sede_id: sedesData.find((s) => s.nombre === perfil.nombre_sede)
+            ? String(sedesData.find((s) => s.nombre === perfil.nombre_sede)!.idsede)
+            : "",
+          numero_licencia: perfil.numero_licencia ?? "",
+          especialidad: perfil.especialidad ?? "",
+          tipo_sangre: perfil.tipo_sangre ?? "",
+          contacto_emergencia: perfil.contacto_emergencia ?? "",
+        })
+      } catch {
+        // keep defaults if API fails
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSave = () => {
-    localStorage.setItem("perfil", JSON.stringify(formData))
-    setIsEditing(false)
-    alert("Perfil actualizado exitosamente")
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await actualizarPerfil({
+        nombre_colaborador: formData.nombre_colaborador,
+        apellido_colaborador: formData.apellido_colaborador,
+        correo_colaborador: formData.correo_colaborador,
+        telefo_colaborador: formData.telefo_colaborador,
+        tipo_documento: formData.tipo_documento,
+        direccion: formData.direccion,
+        sede_id: formData.sede_id ? Number(formData.sede_id) : undefined,
+        numero_licencia: formData.numero_licencia,
+        especialidad: formData.especialidad,
+        tipo_sangre: formData.tipo_sangre,
+        contacto_emergencia: formData.contacto_emergencia,
+      })
+      setIsEditing(false)
+      alert("Perfil actualizado exitosamente")
+    } catch {
+      alert("Error al guardar los cambios")
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase()
+  const handleCancel = () => {
+    if (perfilOriginal) {
+      setFormData({
+        nombre_colaborador: perfilOriginal.nombre_colaborador ?? "",
+        apellido_colaborador: perfilOriginal.apellido_colaborador ?? "",
+        cc_colaborador: perfilOriginal.cc_colaborador ?? "",
+        tipo_documento: perfilOriginal.tipo_documento ?? "CC",
+        correo_colaborador: perfilOriginal.correo_colaborador ?? "",
+        telefo_colaborador: perfilOriginal.telefo_colaborador ?? "",
+        direccion: perfilOriginal.direccion ?? "",
+        nombre_cargo: perfilOriginal.nombre_cargo ?? "",
+        nombre_sede: perfilOriginal.nombre_sede ?? "",
+        sede_id: sedes.find((s) => s.nombre === perfilOriginal.nombre_sede)
+          ? String(sedes.find((s) => s.nombre === perfilOriginal.nombre_sede)!.idsede)
+          : "",
+        numero_licencia: perfilOriginal.numero_licencia ?? "",
+        especialidad: perfilOriginal.especialidad ?? "",
+        tipo_sangre: perfilOriginal.tipo_sangre ?? "",
+        contacto_emergencia: perfilOriginal.contacto_emergencia ?? "",
+      })
+    }
+    setIsEditing(false)
+  }
+
+  const getInitials = (nombre: string, apellido: string) =>
+    `${nombre[0] ?? ""}${apellido[0] ?? ""}`.toUpperCase()
+
+  const nombreCompleto = `${formData.nombre_colaborador} ${formData.apellido_colaborador}`.trim()
+
+  if (loading) {
+    return (
+      <div className="p-8 pt-16 md:pt-8 flex items-center justify-center">
+        <p className="text-muted-foreground">Cargando perfil...</p>
+      </div>
+    )
   }
 
   return (
     <div className="p-4 md:p-8 pt-16 md:pt-8">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Mi Perfil</h1>
-        <p className="text-muted-foreground mt-1">
-          Información personal del paramédico
-        </p>
+        <p className="text-muted-foreground mt-1">Información personal del paramédico</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -69,30 +153,24 @@ export default function PerfilPage() {
             <div className="flex flex-col items-center text-center">
               <Avatar className="h-24 w-24 mb-4">
                 <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                  {getInitials(formData.nombre)}
+                  {getInitials(formData.nombre_colaborador, formData.apellido_colaborador)}
                 </AvatarFallback>
               </Avatar>
-              <h2 className="text-xl font-semibold text-foreground">{formData.nombre}</h2>
-              <p className="text-muted-foreground">{formData.cargo}</p>
+              <h2 className="text-xl font-semibold text-foreground">{nombreCompleto || "—"}</h2>
+              <p className="text-muted-foreground">{formData.nombre_cargo || "—"}</p>
               <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                {formData.sede}
+                {formData.nombre_sede || "—"}
               </div>
               <Separator className="my-4" />
               <div className="w-full space-y-3 text-left">
                 <div className="flex items-center gap-3 text-sm">
                   <Mail className="h-4 w-4 text-primary" />
-                  <span className="text-foreground truncate">{formData.email}</span>
+                  <span className="text-foreground truncate">{formData.correo_colaborador || "—"}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Phone className="h-4 w-4 text-primary" />
-                  <span className="text-foreground">{formData.telefono}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  <span className="text-foreground">
-                    Desde {new Date(formData.fechaIngreso).toLocaleDateString("es-CO", { year: "numeric", month: "long" })}
-                  </span>
+                  <span className="text-foreground">{formData.telefo_colaborador || "—"}</span>
                 </div>
               </div>
             </div>
@@ -109,7 +187,7 @@ export default function PerfilPage() {
             <Button
               variant={isEditing ? "outline" : "default"}
               size="sm"
-              onClick={() => setIsEditing(!isEditing)}
+              onClick={() => isEditing ? handleCancel() : setIsEditing(true)}
               className={!isEditing ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
             >
               {isEditing ? "Cancelar" : "Editar"}
@@ -118,74 +196,59 @@ export default function PerfilPage() {
           <CardContent className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="nombre">Nombre Completo</Label>
-                <Input
-                  id="nombre"
-                  value={formData.nombre}
-                  onChange={(e) => handleInputChange("nombre", e.target.value)}
-                  disabled={!isEditing}
-                />
+                <Label>Nombre</Label>
+                <Input value={formData.nombre_colaborador}
+                  onChange={(e) => handleInputChange("nombre_colaborador", e.target.value)}
+                  disabled={!isEditing} placeholder="Nombre" />
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="space-y-2">
-                  <Label htmlFor="tipoDocumento">Tipo</Label>
-                  <Select
-                    value={formData.tipoDocumento}
-                    onValueChange={(value) => handleInputChange("tipoDocumento", value)}
-                    disabled={!isEditing}
-                  >
-                    <SelectTrigger id="tipoDocumento">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CC">CC</SelectItem>
-                      <SelectItem value="CE">CE</SelectItem>
-                      <SelectItem value="PA">PA</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="documento">Documento</Label>
-                  <Input
-                    id="documento"
-                    value={formData.documento}
-                    onChange={(e) => handleInputChange("documento", e.target.value)}
-                    disabled={!isEditing}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>Apellido</Label>
+                <Input value={formData.apellido_colaborador}
+                  onChange={(e) => handleInputChange("apellido_colaborador", e.target.value)}
+                  disabled={!isEditing} placeholder="Apellido" />
               </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="email">Correo Electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  disabled={!isEditing}
-                />
+                <Label>Tipo Doc.</Label>
+                <Select value={formData.tipo_documento}
+                  onValueChange={(v) => handleInputChange("tipo_documento", v)}
+                  disabled={!isEditing}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CC">CC</SelectItem>
+                    <SelectItem value="CE">CE</SelectItem>
+                    <SelectItem value="PA">PA</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="telefono">Teléfono</Label>
-                <Input
-                  id="telefono"
-                  value={formData.telefono}
-                  onChange={(e) => handleInputChange("telefono", e.target.value)}
-                  disabled={!isEditing}
-                />
+                <Label>Documento</Label>
+                <Input value={formData.cc_colaborador} disabled placeholder="Número de documento" />
+              </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Correo Electrónico</Label>
+                <Input type="email" value={formData.correo_colaborador}
+                  onChange={(e) => handleInputChange("correo_colaborador", e.target.value)}
+                  disabled={!isEditing} placeholder="correo@ejemplo.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Teléfono</Label>
+                <Input value={formData.telefo_colaborador}
+                  onChange={(e) => handleInputChange("telefo_colaborador", e.target.value)}
+                  disabled={!isEditing} placeholder="Número de teléfono" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="direccion">Dirección</Label>
-              <Input
-                id="direccion"
-                value={formData.direccion}
+              <Label>Dirección</Label>
+              <Input value={formData.direccion}
                 onChange={(e) => handleInputChange("direccion", e.target.value)}
-                disabled={!isEditing}
-              />
+                disabled={!isEditing} placeholder="Dirección de residencia" />
             </div>
 
             <Separator />
@@ -197,29 +260,22 @@ export default function PerfilPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="cargo">Cargo</Label>
-                <Input
-                  id="cargo"
-                  value={formData.cargo}
-                  onChange={(e) => handleInputChange("cargo", e.target.value)}
-                  disabled={!isEditing}
-                />
+                <Label>Cargo</Label>
+                <Input value={formData.nombre_cargo} disabled />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sede">Sede</Label>
-                <Select
-                  value={formData.sede}
-                  onValueChange={(value) => handleInputChange("sede", value)}
-                  disabled={!isEditing}
-                >
-                  <SelectTrigger id="sede">
-                    <SelectValue />
-                  </SelectTrigger>
+                <Label>Sede</Label>
+                <Select value={formData.sede_id}
+                  onValueChange={(v) => {
+                    const sede = sedes.find((s) => String(s.idsede) === v)
+                    setFormData(p => ({ ...p, sede_id: v, nombre_sede: sede?.nombre ?? "" }))
+                  }}
+                  disabled={!isEditing}>
+                  <SelectTrigger><SelectValue placeholder={formData.nombre_sede || "Seleccionar"} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Sede Norte">Sede Norte</SelectItem>
-                    <SelectItem value="Sede Sur">Sede Sur</SelectItem>
-                    <SelectItem value="Sede Este">Sede Este</SelectItem>
-                    <SelectItem value="Sede Oeste">Sede Oeste</SelectItem>
+                    {sedes.map((s) => (
+                      <SelectItem key={s.idsede} value={String(s.idsede)}>{s.nombre}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -227,22 +283,16 @@ export default function PerfilPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="licencia">Número de Licencia</Label>
-                <Input
-                  id="licencia"
-                  value={formData.licencia}
-                  onChange={(e) => handleInputChange("licencia", e.target.value)}
-                  disabled={!isEditing}
-                />
+                <Label>Número de Licencia</Label>
+                <Input value={formData.numero_licencia}
+                  onChange={(e) => handleInputChange("numero_licencia", e.target.value)}
+                  disabled={!isEditing} placeholder="N° de licencia" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="especialidad">Especialidad</Label>
-                <Input
-                  id="especialidad"
-                  value={formData.especialidad}
+                <Label>Especialidad</Label>
+                <Input value={formData.especialidad}
                   onChange={(e) => handleInputChange("especialidad", e.target.value)}
-                  disabled={!isEditing}
-                />
+                  disabled={!isEditing} placeholder="Ej: Atención Prehospitalaria" />
               </div>
             </div>
 
@@ -255,43 +305,31 @@ export default function PerfilPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="rh">Tipo de Sangre (RH)</Label>
-                <Select
-                  value={formData.rh}
-                  onValueChange={(value) => handleInputChange("rh", value)}
-                  disabled={!isEditing}
-                >
-                  <SelectTrigger id="rh">
-                    <SelectValue />
-                  </SelectTrigger>
+                <Label>Tipo de Sangre (RH)</Label>
+                <Select value={formData.tipo_sangre}
+                  onValueChange={(v) => handleInputChange("tipo_sangre", v)}
+                  disabled={!isEditing}>
+                  <SelectTrigger><SelectValue placeholder="Tipo de sangre" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="O+">O+</SelectItem>
-                    <SelectItem value="O-">O-</SelectItem>
-                    <SelectItem value="A+">A+</SelectItem>
-                    <SelectItem value="A-">A-</SelectItem>
-                    <SelectItem value="B+">B+</SelectItem>
-                    <SelectItem value="B-">B-</SelectItem>
-                    <SelectItem value="AB+">AB+</SelectItem>
-                    <SelectItem value="AB-">AB-</SelectItem>
+                    {["A+","A-","B+","B-","O+","O-","AB+","AB-"].map((rh) => (
+                      <SelectItem key={rh} value={rh}>{rh}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contactoEmergencia">Contacto de Emergencia</Label>
-                <Input
-                  id="contactoEmergencia"
-                  value={formData.contactoEmergencia}
-                  onChange={(e) => handleInputChange("contactoEmergencia", e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="Nombre - Teléfono"
-                />
+                <Label>Contacto de Emergencia</Label>
+                <Input value={formData.contacto_emergencia}
+                  onChange={(e) => handleInputChange("contacto_emergencia", e.target.value)}
+                  disabled={!isEditing} placeholder="Nombre - Teléfono" />
               </div>
             </div>
 
             {isEditing && (
-              <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button onClick={handleSave} disabled={saving}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                 <Save className="h-4 w-4 mr-2" />
-                Guardar Cambios
+                {saving ? "Guardando..." : "Guardar Cambios"}
               </Button>
             )}
           </CardContent>
@@ -300,3 +338,4 @@ export default function PerfilPage() {
     </div>
   )
 }
+

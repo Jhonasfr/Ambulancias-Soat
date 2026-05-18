@@ -82,7 +82,7 @@ export default function LoginPage() {
 
             <p className="text-sm text-center text-muted-foreground">
               ¿Nuevo en el sistema?{" "}
-              <Link href="/register" className="text-primary underline-offset-4 hover:underline">
+              <Link href="/auth/register" className="text-primary underline-offset-4 hover:underline">
                 Registrar usuario
               </Link>
             </p>

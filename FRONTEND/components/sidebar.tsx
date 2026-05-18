@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
@@ -61,8 +61,14 @@ const settingsIcons: Record<string, React.ElementType> = {
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [expandedItems, setExpandedItems] = useState<string[]>(["SOAT", "Ajustes"])
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+
+  const handleLogout = () => {
+    localStorage.removeItem("user")
+    router.replace("/auth/login")
+  }
 
   const toggleExpand = (title: string) => {
     setExpandedItems((prev) =>
@@ -165,7 +171,10 @@ export function Sidebar() {
           <User className="h-5 w-5" />
           Mi Perfil
         </Link>
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 hover:bg-destructive/20 hover:text-red-300 transition-colors">
+        <button 
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 hover:bg-destructive/20 hover:text-red-300 transition-colors"
+        >
           <LogOut className="h-5 w-5" />
           Salir
         </button>

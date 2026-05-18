@@ -37,26 +37,46 @@ class CapacitacionItemSerializer(serializers.Serializer):
 class ColaboradorListadoSerializer(serializers.ModelSerializer):
     id_colaborador = serializers.IntegerField(source='idcolaborador', read_only=True)
     cc_colaborador = serializers.CharField(source='cccolaborador')
+    tipo_documento = serializers.CharField(allow_null=True, required=False)
     nombre_colaborador = serializers.CharField(source='nombrecolaborador')
     apellido_colaborador = serializers.CharField(source='apellidocolaborador')
     correo_colaborador = serializers.CharField(source='correocolaborador')
+    telefo_colaborador = serializers.CharField(source='telefocolaborador', allow_null=True, required=False)
+    direccion = serializers.CharField(allow_null=True, required=False)
     nombre_cargo = serializers.CharField(source='cargocolaborador.nombrecargo', allow_null=True)
+    nombre_sede = serializers.CharField(source='sede.nombre', allow_null=True)
+    ambulancia_id = serializers.IntegerField(source='ambulancia_id', allow_null=True, read_only=True)
+    ambulancia_placa = serializers.CharField(source='ambulancia.placa', allow_null=True, read_only=True)
     capacitaciones_totales = serializers.IntegerField(source='total_capacitaciones', read_only=True)
     estado_colaborador = serializers.IntegerField(source='estadocolaborador')
     capacitaciones_completadas = serializers.IntegerField(source='completadas', read_only=True)
+    numero_licencia = serializers.CharField(allow_null=True, required=False)
+    especialidad = serializers.CharField(allow_null=True, required=False)
+    tipo_sangre = serializers.CharField(allow_null=True, required=False)
+    contacto_emergencia = serializers.CharField(allow_null=True, required=False)
 
     class Meta:
         model = Colaboradores
         fields = [
             'id_colaborador',
             'cc_colaborador',
+            'tipo_documento',
             'nombre_colaborador',
             'apellido_colaborador',
             'correo_colaborador',
+            'telefo_colaborador',
+            'direccion',
             'nombre_cargo',
+            'nombre_sede',
+            'ambulancia_id',
+            'ambulancia_placa',
             'capacitaciones_totales',
             'estado_colaborador',
             'capacitaciones_completadas',
+            'numero_licencia',
+            'especialidad',
+            'tipo_sangre',
+            'contacto_emergencia',
         ]
 
 

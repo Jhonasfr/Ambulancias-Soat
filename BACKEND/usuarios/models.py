@@ -12,15 +12,22 @@ from django.contrib.auth.models import AbstractBaseUser, UserManager
 class Colaboradores(models.Model):
     idcolaborador = models.AutoField(primary_key=True)
     cccolaborador = models.CharField(max_length=30, null=False, blank=True, unique=True)
+    tipo_documento = models.CharField(max_length=10, blank=True, null=True, default='CC')
     nombrecolaborador = models.CharField(max_length=30)
     apellidocolaborador = models.CharField(max_length=30)
     cargocolaborador = models.ForeignKey('Cargo', models.SET_NULL, null=True)
     correocolaborador = models.CharField(max_length=50, blank=True, null=True)
     telefocolaborador = models.CharField(max_length=20, blank=True, null=True)
+    direccion = models.CharField(max_length=200, blank=True, null=True)
     estadocolaborador = models.IntegerField(default=1)
     nivelcolaborador = models.ForeignKey('Niveles', models.SET_NULL, null=True)
     regionalcolab = models.ForeignKey('Regional', models.SET_NULL, blank=True, null=True)
     sede = models.ForeignKey('ambulancias.Sede', models.SET_NULL, blank=True, null=True)
+    ambulancia = models.ForeignKey('ambulancias.Ambulancia', models.SET_NULL, blank=True, null=True)
+    numero_licencia = models.CharField(max_length=50, blank=True, null=True)
+    especialidad = models.CharField(max_length=100, blank=True, null=True)
+    tipo_sangre = models.CharField(max_length=5, blank=True, null=True)
+    contacto_emergencia = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
         managed = True

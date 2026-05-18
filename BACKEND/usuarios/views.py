@@ -50,14 +50,59 @@ class Perfil(APIView):
             "id_colaborador": colaborador.idcolaborador,
             "nombre_colaborador": colaborador.nombrecolaborador,
             "apellido_colaborador": colaborador.apellidocolaborador,
+            "cc_colaborador": colaborador.cccolaborador,
+            "tipo_documento": colaborador.tipo_documento or "CC",
             "correo_colaborador": colaborador.correocolaborador,
             "telefo_colaborador": colaborador.telefocolaborador,
+            "direccion": colaborador.direccion,
             "nombre_nivel": getattr(colaborador.nivelcolaborador, 'nombrenivel', None) if colaborador.nivelcolaborador_id else None,
             "nombre_regional": getattr(colaborador.regionalcolab, 'nombreregional', None) if colaborador.regionalcolab_id else None,
             "nombre_cargo": getattr(colaborador.cargocolaborador, 'nombrecargo', None) if colaborador.cargocolaborador_id else None,
+            "nombre_sede": getattr(colaborador.sede, 'nombre', None) if colaborador.sede_id else None,
+            "ambulancia_id": colaborador.ambulancia_id,
+            "ambulancia_placa": getattr(colaborador.ambulancia, 'placa', None) if colaborador.ambulancia_id else None,
+            "numero_licencia": colaborador.numero_licencia,
+            "especialidad": colaborador.especialidad,
+            "tipo_sangre": colaborador.tipo_sangre,
+            "contacto_emergencia": colaborador.contacto_emergencia,
         }
 
         return Response(data)
+
+    def put(self, request, id=None):
+        """Actualiza los datos del perfil del colaborador autenticado."""
+        if id is not None:
+            colaborador = Colaboradores.objects.filter(idcolaborador=id).first()
+        else:
+            colaborador = getattr(request.user, 'idcolaboradoru', None)
+
+        if not colaborador:
+            return Response({"error": "Colaborador no encontrado"}, status=404)
+
+        campos_actualizables = [
+            'tipo_documento', 'direccion', 'numero_licencia',
+            'especialidad', 'tipo_sangre', 'contacto_emergencia',
+        ]
+        mapa = {
+            'nombre_colaborador': 'nombrecolaborador',
+            'apellido_colaborador': 'apellidocolaborador',
+            'correo_colaborador': 'correocolaborador',
+            'telefo_colaborador': 'telefocolaborador',
+        }
+        data = request.data
+        for campo in campos_actualizables:
+            if campo in data:
+                setattr(colaborador, campo, data[campo])
+        for frontend_key, model_field in mapa.items():
+            if frontend_key in data:
+                setattr(colaborador, model_field, data[frontend_key])
+        if 'sede_id' in data and data['sede_id']:
+            colaborador.sede_id = data['sede_id']
+        if 'ambulancia_id' in data:
+            colaborador.ambulancia_id = data['ambulancia_id'] or None
+
+        colaborador.save()
+        return Response({"success": True, "message": "Perfil actualizado correctamente"})
 
     def patch(self, request, id=None):
         """Alterna el estado del colaborador (0 <-> 1). Requiere id de colaborador."""
@@ -132,13 +177,21 @@ class Register(APIView):
         try:
             colaborador = Colaboradores.objects.create(
                 cccolaborador=colab_data['cc_colaborador'],
+                tipo_documento=colab_data.get('tipo_documento', 'CC'),
                 nombrecolaborador=colab_data['nombre_colaborador'],
                 apellidocolaborador=colab_data['apellido_colaborador'],
                 cargocolaborador_id=colab_data['cargo_colaborador'],
                 correocolaborador=colab_data.get('correo_colaborador', ''),
                 telefocolaborador=colab_data.get('telefo_colaborador', ''),
+                direccion=colab_data.get('direccion', ''),
                 nivelcolaborador_id=colab_data['nivel_colaborador'],
                 regionalcolab_id=colab_data['regional_colab'],
+                sede_id=colab_data.get('sede_id') or None,
+                ambulancia_id=colab_data.get('ambulancia_id') or None,
+                numero_licencia=colab_data.get('numero_licencia', ''),
+                especialidad=colab_data.get('especialidad', ''),
+                tipo_sangre=colab_data.get('tipo_sangre', ''),
+                contacto_emergencia=colab_data.get('contacto_emergencia', ''),
             )
 
             user = Usuarios(

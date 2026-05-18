@@ -4,21 +4,27 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { isAuthenticated } from "@/app/services/auth";
 
-const PUBLIC_PATHS = ["/auth/login", "/auth/register"];
+const PUBLIC_AUTH_PATHS = ["/auth/login", "/auth/register"];
 
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const router = useRouter();
   const pathname = usePathname();
-
-  const [verified, setVerified] = useState(() => PUBLIC_PATHS.includes(pathname));
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
-    if (PUBLIC_PATHS.includes(pathname)) {
+    // Páginas de autenticación son públicas
+    if (PUBLIC_AUTH_PATHS.includes(pathname)) {
       setVerified(true);
       return;
     }
-    if (!isAuthenticated()) {
-      router.replace("/auth/login");
+
+    // Si el usuario está autenticado en otras rutas, redirige a dashboard
+    if (isAuthenticated()) {
+      router.replace("/dashboard");
     } else {
       setVerified(true);
     }

@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Dashboard
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+
     # Organizacion (singleton)
     path('organizacion/', views.OrganizacionView.as_view(), name='organizacion'),
 

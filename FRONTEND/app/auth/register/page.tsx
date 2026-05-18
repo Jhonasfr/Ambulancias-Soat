@@ -105,7 +105,7 @@ export default function RegisterPage() {
     try {
       await authService.register(payload);
       setSuccess("Usuario registrado correctamente.");
-      setTimeout(() => router.push("/login"), 2000);
+      setTimeout(() => router.push("/auth/login"), 2000);
     } catch (err: any) {
       const msg =
         err?.response?.data?.error ||
@@ -293,7 +293,7 @@ export default function RegisterPage() {
 
             <p className="text-sm text-center text-muted-foreground">
               ¿Ya tienes cuenta?{" "}
-              <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+              <Link href="/auth/login" className="text-primary underline-offset-4 hover:underline">
                 Iniciar sesión
               </Link>
             </p>

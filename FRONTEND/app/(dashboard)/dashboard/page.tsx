@@ -1,7 +1,8 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, TrendingUp, Award, Ambulance } from "lucide-react"
+import { FileText, TrendingUp, Award, Ambulance, Users } from "lucide-react"
 import {
   BarChart,
   Bar,
@@ -11,26 +12,43 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
+import api from "@/app/services/axios"
 
-const weeklyData = [
-  { day: "Lun", registros: 12 },
-  { day: "Mar", registros: 19 },
-  { day: "Mié", registros: 8 },
-  { day: "Jue", registros: 15 },
-  { day: "Vie", registros: 22 },
-  { day: "Sáb", registros: 10 },
-  { day: "Dom", registros: 6 },
-]
-
-const totalRegistros = weeklyData.reduce((acc, curr) => acc + curr.registros, 0)
-
-const topParamedico = {
-  nombre: "Carlos Andrés Martínez",
-  registros: 28,
-  ambulancia: "AMB-001",
+interface DashboardData {
+  total_semana: number
+  promedio_diario: number
+  por_dia: { day: string; registros: number }[]
+  ambulancia_destacada: string
+  ambulancia_registros: number
+  mayor_registro_nombre: string
+  mayor_registro_count: number
+  total_empleados: number
+  total_ambulancias: number
 }
 
+const EMPTY_WEEK = [
+  { day: "Lun", registros: 0 },
+  { day: "Mar", registros: 0 },
+  { day: "Mié", registros: 0 },
+  { day: "Jue", registros: 0 },
+  { day: "Vie", registros: 0 },
+  { day: "Sáb", registros: 0 },
+  { day: "Dom", registros: 0 },
+]
+
 export default function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get("api/dashboard/")
+      .then((res) => setData(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const weeklyData = data?.por_dia ?? EMPTY_WEEK
+
   return (
     <div className="p-4 md:p-8 pt-16 md:pt-8">
       <div className="mb-8">
@@ -49,10 +67,10 @@ export default function DashboardPage() {
             <FileText className="h-5 w-5 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-foreground">{totalRegistros}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +12% vs semana anterior
-            </p>
+            <div className="text-3xl font-bold text-foreground">
+              {loading ? "—" : (data?.total_semana ?? 0)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Semana actual</p>
           </CardContent>
         </Card>
 
@@ -65,7 +83,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">
-              {Math.round(totalRegistros / 7)}
+              {loading ? "—" : (data?.promedio_diario ?? 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Registros por día
@@ -82,10 +100,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-xl font-bold text-foreground truncate">
-              {topParamedico.nombre}
+              {loading ? "—" : (data?.mayor_registro_nombre || "Sin datos")}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {topParamedico.registros} registros esta semana
+              {!loading && `${data?.mayor_registro_count ?? 0} registros esta semana`}
             </p>
           </CardContent>
         </Card>
@@ -99,11 +117,41 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">
-              {topParamedico.ambulancia}
+              {loading ? "—" : (data?.ambulancia_destacada || "Sin datos")}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Más activa esta semana
+              {!loading && `${data?.ambulancia_registros ?? 0} registros esta semana`}
             </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 mt-4 md:mt-6">
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Empleados Activos
+            </CardTitle>
+            <Users className="h-5 w-5 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-foreground">
+              {loading ? "—" : (data?.total_empleados ?? 0)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Ambulancias Activas
+            </CardTitle>
+            <Ambulance className="h-5 w-5 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-foreground">
+              {loading ? "—" : (data?.total_ambulancias ?? 0)}
+            </div>
           </CardContent>
         </Card>
       </div>

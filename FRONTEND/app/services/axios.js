@@ -34,13 +34,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error("API Error:", error.response?.data);
-
     if (error.response?.status === 401) {
-      console.warn("Token expirado o inválido, cerrando sesión...");
       localStorage.removeItem("user");
-      if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
-        window.location.replace("/login");
+      if (typeof window !== "undefined" && !window.location.pathname.includes("/auth/login")) {
+        window.location.replace("/auth/login");
       }
     }
 

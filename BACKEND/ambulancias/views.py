@@ -2,7 +2,9 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.utils import timezone
+from datetime import timedelta
 from .models import Organizacion, Sede, Ambulancia, RegistroSOAT
 from .serializers import (
     OrganizacionSerializer, SedeSerializer, AmbulanciaSerializer,
@@ -222,3 +224,64 @@ class ExportarSOATView(APIView):
             f'attachment; filename="SOAT_{reg.documento_paciente}_{reg.fecha_registro.strftime("%Y-%m-%d")}.txt"'
         )
         return response
+
+
+# ──────────────────────────────────────────────
+#  DASHBOARD  (estadísticas semanales)
+# ──────────────────────────────────────────────
+class DashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from usuarios.models import Colaboradores
+
+        hoy = timezone.now().date()
+        inicio_semana = hoy - timedelta(days=hoy.weekday())
+
+        registros_semana = RegistroSOAT.objects.filter(
+            fecha_registro__date__gte=inicio_semana
+        )
+        total_semana = registros_semana.count()
+
+        dias_transcurridos = max(hoy.weekday() + 1, 1)
+        promedio_diario = round(total_semana / dias_transcurridos, 1)
+
+        dias_labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+        por_dia = []
+        for i in range(7):
+            dia = inicio_semana + timedelta(days=i)
+            count = RegistroSOAT.objects.filter(fecha_registro__date=dia).count()
+            por_dia.append({'day': dias_labels[i], 'registros': count})
+
+        ambulancia_top = (
+            registros_semana
+            .exclude(placa_ambulancia='')
+            .values('placa_ambulancia')
+            .annotate(total=Count('idregistro'))
+            .order_by('-total')
+            .first()
+        )
+
+        tripulante_top = (
+            registros_semana
+            .exclude(tripulante1='')
+            .values('tripulante1')
+            .annotate(total=Count('idregistro'))
+            .order_by('-total')
+            .first()
+        )
+
+        total_empleados = Colaboradores.objects.filter(estadocolaborador=1).count()
+        total_ambulancias = Ambulancia.objects.filter(estado=1).count()
+
+        return Response({
+            'total_semana': total_semana,
+            'promedio_diario': promedio_diario,
+            'por_dia': por_dia,
+            'ambulancia_destacada': ambulancia_top['placa_ambulancia'] if ambulancia_top else '—',
+            'ambulancia_registros': ambulancia_top['total'] if ambulancia_top else 0,
+            'mayor_registro_nombre': tripulante_top['tripulante1'] if tripulante_top else '—',
+            'mayor_registro_count': tripulante_top['total'] if tripulante_top else 0,
+            'total_empleados': total_empleados,
+            'total_ambulancias': total_ambulancias,
+        })
