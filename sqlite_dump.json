@@ -1,0 +1,333 @@
+﻿[
+{
+  "model": "usuarios.colaboradores",
+  "pk": 1,
+  "fields": {
+    "cccolaborador": "12345678",
+    "tipo_documento": "CC",
+    "nombrecolaborador": "Test",
+    "apellidocolaborador": "Live",
+    "cargocolaborador": 1,
+    "correocolaborador": "test@live.com",
+    "telefocolaborador": "3001234567",
+    "direccion": null,
+    "estadocolaborador": 1,
+    "nivelcolaborador": 1,
+    "regionalcolab": 1,
+    "sede": null,
+    "ambulancia": null,
+    "numero_licencia": null,
+    "especialidad": null,
+    "tipo_sangre": null,
+    "contacto_emergencia": null
+  }
+},
+{
+  "model": "usuarios.colaboradores",
+  "pk": 2,
+  "fields": {
+    "cccolaborador": "4534343",
+    "tipo_documento": "CC",
+    "nombrecolaborador": "admin",
+    "apellidocolaborador": "admin",
+    "cargocolaborador": 1,
+    "correocolaborador": "admin@gmail.com",
+    "telefocolaborador": "31231231",
+    "direccion": "",
+    "estadocolaborador": 1,
+    "nivelcolaborador": 1,
+    "regionalcolab": 1,
+    "sede": null,
+    "ambulancia": null,
+    "numero_licencia": "",
+    "especialidad": "",
+    "tipo_sangre": "O+",
+    "contacto_emergencia": ""
+  }
+},
+{
+  "model": "usuarios.colaboradores",
+  "pk": 3,
+  "fields": {
+    "cccolaborador": "45456456",
+    "tipo_documento": "CE",
+    "nombrecolaborador": "carloss",
+    "apellidocolaborador": "carloss",
+    "cargocolaborador": 1,
+    "correocolaborador": "carloss@gmail.com",
+    "telefocolaborador": "121231321",
+    "direccion": "carloss 64",
+    "estadocolaborador": 1,
+    "nivelcolaborador": 1,
+    "regionalcolab": 1,
+    "sede": 1,
+    "ambulancia": 1,
+    "numero_licencia": "1111111",
+    "especialidad": "atenci├│n ",
+    "tipo_sangre": "O+",
+    "contacto_emergencia": "312313231"
+  }
+},
+{
+  "model": "usuarios.colaboradores",
+  "pk": 4,
+  "fields": {
+    "cccolaborador": "4646456",
+    "tipo_documento": "CE",
+    "nombrecolaborador": "adawd",
+    "apellidocolaborador": "awdadw",
+    "cargocolaborador": 1,
+    "correocolaborador": "awdawd@gmail.com",
+    "telefocolaborador": "456456",
+    "direccion": "awdawdd",
+    "estadocolaborador": 1,
+    "nivelcolaborador": 1,
+    "regionalcolab": 1,
+    "sede": 1,
+    "ambulancia": 1,
+    "numero_licencia": "awdawdawd",
+    "especialidad": "awdawdawda",
+    "tipo_sangre": "O-",
+    "contacto_emergencia": "456456456"
+  }
+},
+{
+  "model": "usuarios.colaboradores",
+  "pk": 5,
+  "fields": {
+    "cccolaborador": "544561654156",
+    "tipo_documento": "CC",
+    "nombrecolaborador": "juan",
+    "apellidocolaborador": "juan",
+    "cargocolaborador": 1,
+    "correocolaborador": "juan@gmail.com",
+    "telefocolaborador": "1123132",
+    "direccion": "juan4564",
+    "estadocolaborador": 1,
+    "nivelcolaborador": 1,
+    "regionalcolab": 1,
+    "sede": 1,
+    "ambulancia": 1,
+    "numero_licencia": "654564564",
+    "especialidad": "awdada",
+    "tipo_sangre": "AB+",
+    "contacto_emergencia": "321321231"
+  }
+},
+{
+  "model": "usuarios.cargo",
+  "pk": 1,
+  "fields": {
+    "nombrecargo": "Conductor",
+    "estadocargo": 1
+  }
+},
+{
+  "model": "usuarios.niveles",
+  "pk": 1,
+  "fields": {
+    "nombrenivel": "Basico",
+    "estadonivel": 1,
+    "prom": null
+  }
+},
+{
+  "model": "usuarios.usuarios",
+  "fields": {
+    "last_login": null,
+    "usuario": "testuser_live",
+    "password": "pbkdf2_sha256$1000000$hTDI1RTuij2dldjznZqHKp$AE9UOq73JIwMH3Was68yF21FAJ+2RyZYqzZ5OidW9rs=",
+    "idcolaboradoru": 1,
+    "estadousuario": 1,
+    "tipousuario": 0
+  }
+},
+{
+  "model": "usuarios.usuarios",
+  "fields": {
+    "last_login": null,
+    "usuario": "admin",
+    "password": "pbkdf2_sha256$1000000$jEi7zOMYdun6JY6ECuxvXB$cVlj9KCKlS4m6vU3oWp8QFKA0SfB/HPQuB6cr3ZGjOw=",
+    "idcolaboradoru": 2,
+    "estadousuario": 1,
+    "tipousuario": 0
+  }
+},
+{
+  "model": "usuarios.usuarios",
+  "fields": {
+    "last_login": null,
+    "usuario": "carlos",
+    "password": "pbkdf2_sha256$1000000$jXoAJqdqI2SM3NutsC7N2f$GH12+w+oK4K1vvcMdsKjkoSF+qeiLpIm2lmrPx9z3t0=",
+    "idcolaboradoru": 3,
+    "estadousuario": 1,
+    "tipousuario": 0
+  }
+},
+{
+  "model": "usuarios.usuarios",
+  "fields": {
+    "last_login": null,
+    "usuario": "juan",
+    "password": "pbkdf2_sha256$1000000$lKAVvqjOOPFSSD82or9x7J$YfNYAnYG+gMLdvE44cho98IKmXcTJBy3PeuZd8r9Ui4=",
+    "idcolaboradoru": 4,
+    "estadousuario": 1,
+    "tipousuario": 0
+  }
+},
+{
+  "model": "usuarios.usuarios",
+  "fields": {
+    "last_login": null,
+    "usuario": "juanC",
+    "password": "pbkdf2_sha256$1000000$YBvcvj8E0T6fHEkIwR2vjq$g0zAE3kGP84Tha95taDlVRU8FJrPp0ynll9dAJ7XS0c=",
+    "idcolaboradoru": 5,
+    "estadousuario": 1,
+    "tipousuario": 0
+  }
+},
+{
+  "model": "usuarios.regional",
+  "pk": 1,
+  "fields": {
+    "nombreregional": "Cali",
+    "estadoregional": 1
+  }
+},
+{
+  "model": "ambulancias.organizacion",
+  "pk": 1,
+  "fields": {
+    "nombre": "prueba",
+    "nit": "45645646",
+    "direccion": "wdadawd84646",
+    "telefono": "46456456",
+    "email": "admin@gmail.com",
+    "representante": "admin",
+    "descripcion": "addmin prueba 1"
+  }
+},
+{
+  "model": "ambulancias.sede",
+  "pk": 1,
+  "fields": {
+    "nombre": "cali",
+    "direccion": "awdad",
+    "telefono": "13135",
+    "responsable": "admin",
+    "activa": true
+  }
+},
+{
+  "model": "ambulancias.ambulancia",
+  "pk": 1,
+  "fields": {
+    "placa": "asd123",
+    "tipo": "MAT",
+    "sede": 1,
+    "estado": 1
+  }
+},
+{
+  "model": "ambulancias.registrosoat",
+  "pk": 1,
+  "fields": {
+    "ambulancia": null,
+    "placa_ambulancia": "sdawd",
+    "tipo_ambulancia": "medicalizada",
+    "tripulante1": "awdawd",
+    "tripulante2": "awdawwd",
+    "sede": null,
+    "nombre_paciente": "awdad",
+    "documento_paciente": "4343453",
+    "tipo_documento": "TI",
+    "edad_paciente": "25",
+    "genero_paciente": "F",
+    "direccion_paciente": "dadawdawd",
+    "telefono_paciente": "543453",
+    "fecha_siniestro": null,
+    "hora_siniestro": null,
+    "lugar_siniestro": "",
+    "tipo_vehiculo": "",
+    "placa_vehiculo": "",
+    "poliza": "",
+    "aseguradora": "",
+    "descripcion_siniestro": "",
+    "departamento": "",
+    "ciudad": "",
+    "sede_prestadora": "",
+    "fecha_registro": "2026-05-18T20:09:12.323Z",
+    "registrado_por": [
+      "admin"
+    ]
+  }
+},
+{
+  "model": "ambulancias.registrosoat",
+  "pk": 2,
+  "fields": {
+    "ambulancia": 1,
+    "placa_ambulancia": "asd123",
+    "tipo_ambulancia": "Medicalizada Asistencial Terrestre",
+    "tripulante1": "carloss carloss",
+    "tripulante2": "adawd awdadw",
+    "sede": null,
+    "nombre_paciente": "awda",
+    "documento_paciente": "464646",
+    "tipo_documento": "TI",
+    "edad_paciente": "12",
+    "genero_paciente": "F",
+    "direccion_paciente": "awddawdaw",
+    "telefono_paciente": "6546",
+    "fecha_siniestro": "0026-11-11",
+    "hora_siniestro": "11:11:00",
+    "lugar_siniestro": "jamundi",
+    "tipo_vehiculo": "bicicleta",
+    "placa_vehiculo": "awd123",
+    "poliza": "POL-54464",
+    "aseguradora": "allianz",
+    "descripcion_siniestro": "awdawdawd",
+    "departamento": "cauca",
+    "ciudad": "buenaventura",
+    "sede_prestadora": "valle-lili",
+    "fecha_registro": "2026-05-20T00:16:24.807Z",
+    "registrado_por": [
+      "admin"
+    ]
+  }
+},
+{
+  "model": "ambulancias.registrosoat",
+  "pk": 3,
+  "fields": {
+    "ambulancia": 1,
+    "placa_ambulancia": "asd123",
+    "tipo_ambulancia": "Medicalizada Asistencial Terrestre",
+    "tripulante1": "adawd awdadw",
+    "tripulante2": "carloss carloss",
+    "sede": null,
+    "nombre_paciente": "Steban Rodriguez",
+    "documento_paciente": "1111111111",
+    "tipo_documento": "CC",
+    "edad_paciente": "21",
+    "genero_paciente": "M",
+    "direccion_paciente": "carrera 65 # 33-99",
+    "telefono_paciente": "3186552974",
+    "fecha_siniestro": "2026-05-22",
+    "hora_siniestro": "08:03:00",
+    "lugar_siniestro": "jamundi",
+    "tipo_vehiculo": "bus",
+    "placa_vehiculo": "asc941",
+    "poliza": "POL-88888888",
+    "aseguradora": "bolivar",
+    "descripcion_siniestro": "",
+    "departamento": "cauca",
+    "ciudad": "cali",
+    "sede_prestadora": "valle-lili",
+    "fecha_registro": "2026-05-22T13:03:47.894Z",
+    "registrado_por": [
+      "admin"
+    ]
+  }
+}
+]
