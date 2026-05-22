@@ -336,7 +336,6 @@ class RegisterTemporal(APIView):
 
 
 class ListaUsuarios(APIView):
-    permission_classes = [IsAuthenticated, IsSuperAdmin, IsAdminUser]
 
     def get(self, request, *args, **kwargs):
         try:
@@ -352,7 +351,7 @@ class ListaUsuarios(APIView):
             base_qs = (
                 Colaboradores.objects
                 .filter(estadocolaborador=1)
-                .select_related('cargocolaborador')
+                .select_related('cargocolaborador', 'sede', 'ambulancia')
                 .order_by('idcolaborador')
             )
 

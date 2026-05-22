@@ -159,7 +159,7 @@ export default function EmpleadosPage() {
           nivel_colaborador: Number(formData.nivel_colaborador),
           regional_colab: Number(formData.regional_colab),
           sede_id: formData.sede_id ? Number(formData.sede_id) : null,
-          ambulancia_id: formData.ambulancia_id ? Number(formData.ambulancia_id) : null,
+          ambulancia_id: formData.ambulancia_id && formData.ambulancia_id !== "none" ? Number(formData.ambulancia_id) : null,
           numero_licencia: formData.numero_licencia,
           especialidad: formData.especialidad,
           tipo_sangre: formData.tipo_sangre,
@@ -329,7 +329,7 @@ export default function EmpleadosPage() {
                   onValueChange={(v) => setFormData(p => ({ ...p, ambulancia_id: v }))}>
                   <SelectTrigger><SelectValue placeholder="Sin ambulancia asignada" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin ambulancia</SelectItem>
+                    <SelectItem value="none">Sin ambulancia</SelectItem>
                     {ambulancias.map((a) => (
                       <SelectItem key={a.idambulancia} value={String(a.idambulancia)}>
                         {a.placa} — {a.tipo_display}{a.sede_nombre ? ` (${a.sede_nombre})` : ""}
